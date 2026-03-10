@@ -104,6 +104,15 @@ Route::middleware('auth')->name('user.')->group(function () {
                 Route::post('change-password', 'submitPassword');
             });
 
+            // Reseller (API key, download mini-site, Pro install)
+            Route::controller('ResellerController')->prefix('reseller')->name('reseller.')->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::get('api-docs', 'apiDocs')->name('api-docs');
+                Route::post('generate-key', 'generateKey')->name('generate-key');
+                Route::post('pro-install', 'proInstallSubmit')->name('pro-install.submit');
+                Route::post('become-reseller', 'becomeResellerSubmit')->name('become.submit');
+            });
+
         });
 
         // Payment

@@ -16,12 +16,24 @@ class Order extends Model
 
     protected $fillable = [
         'user_id',
+        'reseller_id',
         'total_amount',
+        'product_id',
         'status',
+        'reported_at',
+        'report_reason',
+    ];
+
+    protected $casts = [
+        'reported_at' => 'datetime',
     ];
 
     public function user(){
         return $this->belongsTo(User::class);
+    }
+
+    public function reseller(){
+        return $this->belongsTo(Reseller::class);
     }
 
     public function orderItems(){

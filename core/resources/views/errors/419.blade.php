@@ -22,7 +22,8 @@
     <title>LOGGPLUG STORE</title>
 
     <!-- Stylesheets -->
-    <link rel="stylesheet" type="text/css" href="{{ url('') }}/assets/assets/css/style.css">
+    <link rel="stylesheet" href="{{ url('') }}/assets/assets2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url('') }}/assets/assets2/css/main.css">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -87,9 +88,8 @@
 <!--**********************************
     Scripts
 ***********************************-->
-<script src="{{ url('') }}/assets/assets/js/jquery.js"></script>
-<script src="{{ url('') }}/assets/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-<script src="{{ url('') }}/assets/assets/js/settings.js"></script>
-<script src="{{ url('') }}/assets/assets/js/custom.js"></script>
+<script src="{{ url('') }}/assets/assets2/js/jquery-3.7.1.min.js"></script>
+<script src="{{ url('') }}/assets/assets2/js/boostrap.bundle.min.js"></script>
+<script src="{{ url('') }}/assets/assets2/js/main.js"></script>
 </body>
 </html>

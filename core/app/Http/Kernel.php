@@ -75,5 +75,6 @@ class Kernel extends HttpKernel
         'registration.complete' => \App\Http\Middleware\RegistrationStep::class,
         'maintenance' => \App\Http\Middleware\MaintenanceMode::class,
         'log.requests' => \App\Http\Middleware\LogExcessiveRequests::class,
+        'reseller.api' => \App\Http\Middleware\ResellerApiAuth::class,
     ];
 }

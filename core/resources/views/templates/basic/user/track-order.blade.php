@@ -17,15 +17,18 @@
     <meta name="format-detection" content="telephone=no">
 
     <!-- Favicons Icon -->
-    <link rel="shortcut icon" type="image/x-icon" href="{{url('')}}/assets/assets/images/favicon.png" />
+    <link rel="shortcut icon" href="{{ url('') }}/assets/assets2/images/logo/favicon.png">
 
     <!-- Title -->
     <title>LOGS PLUG</title>
 
 
-    <!-- Stylesheets -->
-    <link rel="stylesheet" type="text/css" href="{{url('')}}/assets/assets/css/style.css">
-    <link rel="stylesheet" href="{{url('')}}/assets/assets/vendor/swiper/swiper-bundle.min.css">
+    <!-- Stylesheets (assets2) -->
+    <link rel="stylesheet" href="{{ url('') }}/assets/assets2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url('') }}/assets/assets2/css/fontawesome-all.min.css">
+    <link rel="stylesheet" href="{{ url('') }}/assets/assets2/css/line-awesome.min.css">
+    <link rel="stylesheet" href="{{ url('') }}/assets/assets2/css/main.css">
+    <link rel="stylesheet" href="{{ url('') }}/assets/assets2/css/swipper.min.css">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -217,11 +220,8 @@
 <!--**********************************
     Scripts
 ***********************************-->
-<script src="{{url('')}}/assets/assets/js/jquery.js"></script>
-<script src="{{url('')}}/assets/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-<script src="{{url('')}}/assets/assets/js/dz.carousel.js"></script><!-- Swiper -->
-<script src="{{url('')}}/assets/assets/vendor/swiper/swiper-bundle.min.js"></script><!-- Swiper -->
-<script src="{{url('')}}/assets/assets/js/settings.js"></script>
-<script src="{{url('')}}/assets/assets/js/custom.js"></script>
+<script src="{{ url('') }}/assets/assets2/js/jquery-3.7.1.min.js"></script>
+<script src="{{ url('') }}/assets/assets2/js/boostrap.bundle.min.js"></script>
+<script src="{{ url('') }}/assets/assets2/js/main.js"></script>
 </body>
 </html>

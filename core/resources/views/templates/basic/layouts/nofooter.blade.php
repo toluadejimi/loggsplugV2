@@ -23,11 +23,17 @@
     <!-- PWA Version -->
     <link rel="manifest" href="manifest.json">
 
-    <!-- Stylesheets -->
-    <link rel="stylesheet"
-          href="{{ url('') }}/assets/assets/vendor/bootstrap-touchspin/dist/jquery.bootstrap-touchspin.min.css">
+    <!-- Same CSS as /products (layouts.main) -->
+    <link rel="shortcut icon" href="{{ url('') }}/assets/assets2/images/logo/favicon.png">
+    <link rel="stylesheet" href="{{ url('') }}/assets/assets2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url('') }}/assets/assets2/css/fontawesome-all.min.css">
+    <link rel="stylesheet" href="{{ url('') }}/assets/assets2/css/slick.css">
+    <link rel="stylesheet" href="{{ url('') }}/assets/assets2/css/magnific-popup.css">
+    <link rel="stylesheet" href="{{ url('') }}/assets/assets2/css/line-awesome.min.css">
+    <link rel="stylesheet" href="{{ url('') }}/assets/assets2/css/main.css">
+    <link rel="stylesheet" href="{{ url('') }}/assets/assets2/css/swipper.min.css">
+    <link rel="stylesheet" href="{{ url('') }}/assets/assets/vendor/bootstrap-touchspin/dist/jquery.bootstrap-touchspin.min.css">
     <link rel="stylesheet" href="{{ url('') }}/assets/assets/vendor/swiper/swiper-bundle.min.css">
-    <link rel="stylesheet" type="text/css" href="{{ url('') }}/assets/assets/css/style.css">
 
     <!-- Laravel PWA -->
     @laravelPWA
@@ -165,6 +171,8 @@
                                 <h5 class="mb-0 ms-2 text-nowrap">Product Details</h5>
                             @elseif(Route::current()->getName() === 'user.user.rules')
                                 <h5 class="mb-0 ms-2 text-nowrap">Rules</h5>
+                            @elseif(str_starts_with(Route::current()->getName() ?? '', 'user.reseller'))
+                                <h5 class="mb-0 ms-2 text-nowrap">Reseller</h5>
 
                             @endif
 
@@ -306,6 +314,14 @@
                         </span>
                     <span>Profile</span>
                 </a></li>
+            <li><a class="nav-link" href="{{ route('user.reseller.index') }}">
+                        <span class="dz-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000">
+                                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                            </svg>
+                        </span>
+                    <span>Reseller</span>
+                </a></li>
             <li><a class="nav-link" href="messages.html">
                         <span class="dz-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24"
@@ -407,17 +423,27 @@ Scripts
 <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 
 
-<script src="{{ url('') }}/assets/assets/js/jquery.js"></script>
+<!-- Same JS as /products (layouts.main) -->
+<script src="{{ url('') }}/assets/assets2/js/jquery-3.7.1.min.js"></script>
+<script src="{{ url('') }}/assets/assets2/js/boostrap.bundle.min.js"></script>
+<script src="{{ url('') }}/assets/assets2/js/countdown.js"></script>
+<script src="{{ url('') }}/assets/assets2/js/counterup.min.js"></script>
+<script src="{{ url('') }}/assets/assets2/js/slick.min.js"></script>
+<script src="{{ url('') }}/assets/assets2/js/jquery.magnific-popup.js"></script>
+<script src="{{ url('') }}/assets/assets2/js/apexchart.js"></script>
+<script src="{{ url('') }}/assets/assets2/js/demo.js"></script>
 <script src="{{ url('') }}/assets/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-<script src="{{ url('') }}/assets/assets/vendor/swiper/swiper-bundle.min.js"></script><!-- Swiper -->
-<script src="{{ url('') }}/assets/assets/js/dz.carousel.js"></script><!-- Swiper -->
-<script src="{{ url('') }}/assets/assets/vendor/bootstrap-touchspin/dist/jquery.bootstrap-touchspin.min.js">
-</script><!-- Swiper -->
+<script src="{{ url('') }}/assets/assets/vendor/swiper/swiper-bundle.min.js"></script>
+<script src="{{ url('') }}/assets/assets/js/dz.carousel.js"></script>
+<script src="{{ url('') }}/assets/assets/vendor/bootstrap-touchspin/dist/jquery.bootstrap-touchspin.min.js"></script>
 <script src="{{ url('') }}/assets/assets/js/settings.js"></script>
 <script src="{{ url('') }}/assets/assets/js/custom.js"></script>
-<script src="index.js" defer></script>
+<script src="{{ url('') }}/assets/assets2/js/main.js"></script>
+<script src="{{ url('') }}/assets/assets2/js/js1.js"></script>
+<script src="{{ url('') }}/assets/assets2/js/js2.js"></script>
+<script src="{{ url('') }}/assets/assets2/js/js3.js"></script>
 <script>
-    $(".stepper").TouchSpin();
+    if (typeof $ !== 'undefined' && $.fn.TouchSpin) { $(".stepper").TouchSpin(); }
 </script>
 </body>
 

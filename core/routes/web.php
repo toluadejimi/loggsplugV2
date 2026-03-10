@@ -4,6 +4,12 @@ use App\Http\Controllers\ProxyController;
 use Illuminate\Support\Facades\Route;
 use Rap2hpoutre\LaravelLogViewer\LogViewerController;
 
+Route::get('/reseller-site/download', \App\Http\Controllers\ResellerSiteDownloadController::class)->name('reseller-site.download');
+
+// SprintPay (and similar) callback for reseller-site wallet funding – script lives in resources, not public
+Route::any('/reseller-site/fund_callback', \App\Http\Controllers\ResellerFundCallbackController::class)->name('reseller-site.fund_callback');
+Route::any('/reseller-site/fund_callback.php', \App\Http\Controllers\ResellerFundCallbackController::class);
+
 Route::get('/clear', function(){
     \Illuminate\Support\Facades\Artisan::call('optimize:clear');
 });

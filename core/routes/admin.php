@@ -75,6 +75,18 @@ Route::middleware('admin')->group(function () {
         Route::post('delete/{id}', 'delete')->name('delete');
     });
 
+    // Resellers
+    Route::controller('ResellerController')->prefix('resellers')->name('resellers.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('create', 'create')->name('create');
+        Route::post('store', 'store')->name('store');
+        Route::get('edit/{id}', 'edit')->name('edit');
+        Route::post('update/{id}', 'update')->name('update');
+        Route::post('revoke-key/{id}', 'revokeKey')->name('revoke-key');
+        Route::post('regenerate-key/{id}', 'regenerateKey')->name('regenerate-key');
+        Route::get('orders/{id}', 'orders')->name('orders');
+    });
+
     // Product
     Route::controller('ProductController')->prefix('product')->name('product.')->group(function(){
         Route::get('all', 'all')->name('all');
@@ -165,6 +177,7 @@ Route::middleware('admin')->group(function () {
     // Report
     Route::controller('ReportController')->prefix('report')->name('report.')->group(function(){
         Route::get('order/history', 'orderHistory')->name('order.history');
+        Route::get('order/reseller-reported', 'resellerReportedOrders')->name('order.resellerReported');
         Route::get('order/find', 'orderHistoryFind')->name('order.find');
         Route::get('order/details/{id}', 'orderDetails')->name('order.details');
         Route::get('login/history', 'loginHistory')->name('login.history');

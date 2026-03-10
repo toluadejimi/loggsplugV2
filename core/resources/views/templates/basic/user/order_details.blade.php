@@ -16,7 +16,8 @@
                 <div class="card border-0 shadow-sm">
                     <div class="card-body">
                         <h6 class="fw-bold text-muted mb-1">@lang('Product')</h6>
-                        <p class="mb-0">{{ @$orderItems->first()->product->name ?? 'N/A' }}</p>
+                        <p class="mb-0">{{ optional(optional($order->orderItems->first())->product)->name ?? optional(\App\Models\Product::find($order->product_id))->name ?? 'N/A' }}</p>
+                        <p class="mb-0 mt-1"><span class="fw-bold text-muted">@lang('Quantity'):</span> {{ $order->orderItems->count() - 1 }}</p>
                     </div>
                 </div>
             </div>
@@ -44,6 +45,7 @@
                             </thead>
                             <tbody>
                             @foreach($orderItems as $item)
+                                @if($item->productDetail)
                                 <tr>
                                     <td>
                                         <input type="text"
@@ -55,17 +57,18 @@
                                     <td class="text-center">
                                         <button class="btn btn-outline-secondary btn-sm rounded-circle copy-btn"
                                                 data-target="copyInput{{ $item->productDetail->id }}">
-                                            <i style="color: black" class="fa fa-copy"></i>
+                                            <i class="fa fa-copy copy-icon"></i>
                                         </button>
                                     </td>
                                 </tr>
+                                @else
+                                <tr>
+                                    <td colspan="2" class="text-muted small">@lang('Item detail unavailable')</td>
+                                </tr>
+                                @endif
                             @endforeach
                             </tbody>
                         </table>
-                    </div>
-
-                    <div class="d-flex justify-content-center mt-3">
-                        {{ paginateLinks($orderItems) }}
                     </div>
                 @else
                     <div class="text-center py-5">
@@ -102,8 +105,10 @@
         });
     </script>
 
-    {{-- Copy Toast Styling --}}
+    {{-- Copy icon + toast --}}
     <style>
+        .copy-btn .copy-icon,
+        .copy-btn .fa-copy { color: #212529 !important; opacity: 1; }
         .copy-toast {
             position: fixed;
             bottom: 30px;

@@ -28,6 +28,13 @@
                     </a>
                 </li>
 
+                <li class="sidebar-menu-item {{menuActive('admin.resellers*')}}">
+                    <a href="{{route('admin.resellers.index')}}" class="nav-link ">
+                        <i class="menu-icon las la-store-alt"></i>
+                        <span class="menu-title">@lang('Resellers')</span>
+                    </a>
+                </li>
+
                 <li class="sidebar-menu-item sidebar-dropdown">
                     <a href="javascript:void(0)" class="{{menuActive('admin.users*',3)}}">
                         <i class="menu-icon las la-users"></i>
@@ -243,6 +250,12 @@
                                 <a href="{{route('admin.report.order.history')}}" class="nav-link">
                                     <i class="menu-icon las la-dot-circle"></i>
                                     <span class="menu-title">@lang('Order History')</span>
+                                </a>
+                            </li>
+                            <li class="sidebar-menu-item {{menuActive(['admin.report.order.resellerReported'])}}">
+                                <a href="{{route('admin.report.order.resellerReported')}}" class="nav-link">
+                                    <i class="menu-icon las la-dot-circle"></i>
+                                    <span class="menu-title">@lang('Reseller Reported')</span>
                                 </a>
                             </li>
 

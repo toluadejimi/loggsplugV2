@@ -46,11 +46,15 @@ class PaymentController extends Controller
 
             }
 
-            $qty = $request->qty;
+            $qtyRaw = $request->input('qty', 1);
+            if (is_array($qtyRaw)) {
+                $qtyRaw = $qtyRaw[0] ?? 1;
+            }
+            $qty = max(1, min(100, (int) $qtyRaw));
 
             $product = Product::active()->whereHas('category', function ($category) {
                 return $category->active();
-            })->findOrFail($request->id);
+            })->findOrFail($request->input('id'));
 
             $unsoldProductDetails = $product->unsoldProductDetails;
 

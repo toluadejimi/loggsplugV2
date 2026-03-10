@@ -1,152 +1,182 @@
-@extends($activeTemplate.'layouts.main')
+@extends($activeTemplate . 'layouts.main')
 @section('content')
-    <div class="container">
-        <div class="row gy-4 mt-3">
-            <div class="col-xl-12 col-sm-12">
 
-                <div class="row p-4">
-                    <div class="col-6">
-                        <div class="card border-0  p-4">
-                            <h6 class="text-center">Total Orders</h6>
-                            <strong class="text-center">{{$count_order}}</strong>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="card border-0  p-4">
-                            <h6 class="text-center">Total Spent</h6>
-                            <strong class="text-center">NGN {{number_format($order_sum)}}</strong>
-                        </div>
-                    </div>
+    <div class="dashboard-body__content orders-page">
 
+        <div class="orders-page-header mb-4">
+            <h1 class="orders-page-title mb-2">Order history</h1>
+            <p class="text-muted small mb-0">View and manage your orders.</p>
+        </div>
 
-                    {{--                    <div class=" col-xl-12 col-md-12 my-3 col-sm-12 d-flex justify-content-end" >--}}
-                    {{--                        <div class=" card border-0  p-4 ">--}}
-                    {{--                            <form action="" class="search-input">--}}
-                    {{--                                <span class="icon"><img src="{{ url('') }}/assets/assets2/images/icons/search-dark.svg" alt=""></span>--}}
-                    {{--                                <input type="text" name="search" value="{{ request()->search }}" class="common-input common-input--md common-input--bg pill w-100"--}}
-                    {{--                                       placeholder="Search by Trx">--}}
-                    {{--                            </form>--}}
-
-                    {{--                        </div>--}}
-
-
-                    {{--                    </div>--}}
-
-
-                </div>
-
-
-                <div class="col-xl-12 col-sm-12 p-2">
-                    <div class="dashboard-widget">
-                        <h5 class="mt-4 mb-4">@lang('Latest Order History')</h5>
-
-                        <div class="dashboard-body__item">
-                            <div class="table-responsive">
-                                <table class="table style-two">
-                                    <thead>
-                                    <tr>
-                                        <th>Order ID</th>
-                                        <th>Product Name</th>
-                                        <th>Qty</th>
-                                        <th>Amount(NGN)</th>
-                                        <th>Date</th>
-
-                                    </tr>
-                                    @forelse($orders as $order)
-                                        @php
-                                            $qty = @$order->orderItems->count();
-                                            $perUnitPrice = @$order->orderItems->first()->price;
-                                        @endphp
-                                        <tr class="text-small">
-                                            <td class="text-dark">
-
-                                                <a class="text-primary" href="{{ route('user.order.details', $order->id) }}">
-                                                    <i class="fa fa-shopping-bag"></i>
-
-                                                    {{ $order->id }} {{ "| View Orders" }}
-                                                </a>
-                                            </td>
-
-                                            <td class="text-dark">
-
-                                                @php $name = \App\Models\Product::where('id', $order->product_id)->first()->name ?? null; @endphp
-                                                <a class="text-primary" href="{{ route('user.order.details', $order->id) }}">
-                                                    {{ $name ?? "Product Name" }}
-                                            </td>
-
-                                            <td>
-                                                <span>{{ @$order->orderItems->count() }}</span>
-                                            </td>
-                                            <td>
-                                                {{showAmount($order->total_amount)}}
-                                            </td>
-                                            <td>
-                                                {{ diffForHumans($order->created_at) }}
-                                            </td>
-
-
-
-
-
-{{--                                            <td>--}}
-{{--                                                <div class="col">--}}
-{{--                                                    <div class="action-buttons">--}}
-{{--                                                        <a class="btn btn-dark btn-sm"--}}
-{{--                                                           href="{{ route('user.order.details', $order->id) }}">--}}
-{{--                                                            <i class="fa fa-shopping-bag"></i>--}}
-{{--                                                        </a>--}}
-{{--                                                    </div>--}}
-{{--                                                </div>--}}
-
-{{--                                            </td>--}}
-
-
-                                        </tr>
-                                    @empty
-                                        <div class="card border-0">
-                                            <div class="card-body text-center p-4">
-
-                                                <svg width="40" height="40" viewBox="0 0 25 25" fill="none"
-                                                     xmlns="http://www.w3.org/2000/svg">
-                                                    <path
-                                                        d="M0.699126 22.1299L11.4851 0.936473C11.6065 0.697285 11.7856 0.49768 12.0036 0.358621C12.2215 0.219562 12.4703 0.146179 12.7237 0.146179C12.9772 0.146179 13.2259 0.219562 13.4439 0.358621C13.6618 0.49768 13.841 0.697285 13.9624 0.936473L24.7483 22.1299C24.8658 22.3607 24.9253 22.6205 24.9209 22.8835C24.9165 23.1466 24.8484 23.4039 24.7234 23.6301C24.5983 23.8562 24.4206 24.0434 24.2078 24.1732C23.995 24.303 23.7543 24.3708 23.5097 24.3701H1.93781C1.69314 24.3708 1.45252 24.303 1.23968 24.1732C1.02684 24.0434 0.849131 23.8562 0.724084 23.6301C0.599037 23.4039 0.530969 23.1466 0.526592 22.8835C0.522216 22.6205 0.581682 22.3607 0.699126 22.1299ZM14.2252 14.2749L14.9815 9.39487C15.0039 9.25037 14.9967 9.10237 14.9605 8.96116C14.9243 8.81995 14.8599 8.6889 14.7719 8.57713C14.6838 8.46536 14.5742 8.37554 14.4506 8.31391C14.327 8.25228 14.1925 8.22033 14.0563 8.22026H11.3912C11.255 8.22033 11.1204 8.25228 10.9969 8.31391C10.8733 8.37554 10.7637 8.46536 10.6756 8.57713C10.5876 8.6889 10.5232 8.81995 10.487 8.96116C10.4508 9.10237 10.4436 9.25037 10.466 9.39487L11.2223 14.2749H14.2252ZM14.7882 18.1096C14.7882 17.5208 14.5707 16.9561 14.1835 16.5398C13.7964 16.1234 13.2713 15.8895 12.7237 15.8895C12.1762 15.8895 11.6511 16.1234 11.2639 16.5398C10.8768 16.9561 10.6593 17.5208 10.6593 18.1096C10.6593 18.6984 10.8768 19.2631 11.2639 19.6794C11.6511 20.0957 12.1762 20.3296 12.7237 20.3296C13.2713 20.3296 13.7964 20.0957 14.1835 19.6794C14.5707 19.2631 14.7882 18.6984 14.7882 18.1096Z"
-                                                        fill="#EA4335"/>
-                                                </svg>
-                                                <br><br>
-
-                                                <h6>No data found</h6>
-
-
-                                            </div>
-                                        </div>
-                                    @endforelse
-
-                                    </thead>
-
-                                    <tbody>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+        <div class="orders-stats row g-3 mb-4">
+            <div class="col-6 col-md-3">
+                <div class="card orders-stat-card border-0 shadow-sm h-100">
+                    <div class="card-body text-center py-4">
+                        <p class="orders-stat-label text-muted small mb-1">Total orders</p>
+                        <p class="orders-stat-value fw-700 mb-0">{{ $count_order ?? 0 }}</p>
                     </div>
                 </div>
-
-
-
-
             </div>
-
-            <div class="d-flex justify-content-center">
-
-                <nav aria-label="Page navigation example">
-                    <ul class="pagination common-pagination mt-0">
-                        <li class="page-item"> {{ paginateLinks($orders) }}</li>
-                        <li class="page-item active"></li>
-                    </ul>
-                </nav>
+            <div class="col-6 col-md-3">
+                <div class="card orders-stat-card border-0 shadow-sm h-100">
+                    <div class="card-body text-center py-4">
+                        <p class="orders-stat-label text-muted small mb-1">Total spent</p>
+                        <p class="orders-stat-value fw-700 mb-0">{{ $general->cur_sym ?? 'NGN' }} {{ number_format($order_sum ?? 0) }}</p>
+                    </div>
+                </div>
             </div>
+        </div>
 
+        <div class="card orders-table-card border-0 shadow-sm">
+            <div class="card-header orders-table-header bg-transparent border-0 py-4">
+                <h5 class="mb-0 fw-600 d-flex align-items-center gap-2">
+                    <i class="las la-shopping-bag"></i>
+                    Latest order history
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table orders-table mb-0">
+                        <thead>
+                            <tr>
+                                <th class="text-muted small fw-600">Order</th>
+                                <th class="text-muted small fw-600">Product</th>
+                                <th class="text-muted small fw-600">Qty</th>
+                                <th class="text-muted small fw-600">Amount</th>
+                                <th class="text-muted small fw-600">Date</th>
+                                <th class="text-muted small fw-600 text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($orders as $order)
+                                @php
+                                    $qty = @$order->orderItems->count();
+                                    $productName = \App\Models\Product::where('id', $order->product_id)->first()->name ?? 'Product';
+                                @endphp
+                                <tr>
+                                    <td>
+                                        <a href="{{ route('user.order.details', $order->id) }}" class="orders-link fw-600 text-decoration-none">
+                                            #{{ $order->id }}
+                                            <span class="text-muted small fw-normal">View details</span>
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a href="{{ route('user.order.details', $order->id) }}" class="orders-link text-decoration-none">
+                                            {{ $productName }}
+                                        </a>
+                                    </td>
+                                    <td class="small">{{ $qty ? $qty - 1 : 0 }}</td>
+                                    <td class="fw-600">{{ $general->cur_sym ?? 'NGN' }} {{ showAmount($order->total_amount) }}</td>
+                                    <td class="small text-muted">{{ diffForHumans($order->created_at) }}</td>
+                                    <td class="text-end">
+                                        <button type="button"
+                                                class="btn btn-sm orders-buy-again-btn buy-again-btn"
+                                                data-product-id="{{ $order->product_id }}"
+                                                data-product-name="{{ $productName }}">
+                                            Buy again
+                                        </button>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="orders-empty text-center py-5">
+                                        <i class="las la-shopping-cart text-muted mb-2" style="font-size: 2.5rem;"></i>
+                                        <p class="text-muted small mb-2">No orders yet.</p>
+                                        <a href="{{ route('products') }}" class="btn btn-primary btn-sm rounded-pill">Browse products</a>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+                @if($orders->hasPages())
+                    <div class="orders-pagination p-3 border-top d-flex justify-content-center">
+                        {{ paginateLinks($orders) }}
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
 
+    {{-- Buy again modal --}}
+    <div class="modal fade" id="buyAgainModal" tabindex="-1" aria-labelledby="buyAgainModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-600" id="buyAgainModalLabel">Buy again</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="buyAgainForm" action="{{ route('user.deposit.insert') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="id" id="buyAgainProductId" value="">
+                    <input type="hidden" name="payment" value="wallet">
+                    <input type="hidden" name="gateway" value="250">
+                    <div class="modal-body">
+                        <p class="text-muted small mb-3" id="buyAgainProductLabel">Enter quantity for this product.</p>
+                        <label for="buyAgainQty" class="form-label">Quantity</label>
+                        <input type="number" name="qty" id="buyAgainQty" class="form-control" value="1" min="1" max="100" required>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary rounded-pill">Place order</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
-
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var modal = document.getElementById('buyAgainModal');
+            if (!modal) return;
+            var productIdInput = document.getElementById('buyAgainProductId');
+            var productLabel = document.getElementById('buyAgainProductLabel');
+            var qtyInput = document.getElementById('buyAgainQty');
+            document.querySelectorAll('.buy-again-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var productId = this.getAttribute('data-product-id');
+                    var productName = this.getAttribute('data-product-name');
+                    if (productIdInput) productIdInput.value = productId || '';
+                    if (productLabel) productLabel.textContent = 'Enter quantity for: ' + (productName || 'this product');
+                    if (qtyInput) qtyInput.value = '1';
+                    var bsModal = typeof bootstrap !== 'undefined' && bootstrap.Modal ? new bootstrap.Modal(modal) : null;
+                    if (bsModal) bsModal.show();
+                    else { modal.classList.add('show'); modal.style.display = 'block'; }
+                });
+            });
+        });
+    </script>
 @endsection
+
+@push('style')
+<style>
+.orders-page { padding-bottom: 2rem; }
+.orders-page-title { font-size: 1.5rem; font-weight: 700; color: #1e293b; }
+.orders-stat-card { border-radius: 12px; }
+.orders-stat-value { font-size: 1.25rem; color: #1e293b; }
+.orders-table-card { border-radius: 12px; }
+.orders-table-header { padding-left: 1.25rem; padding-right: 1.25rem; }
+.orders-table thead { background: #f8fafc; }
+.orders-table th {
+    padding: 0.65rem 1rem;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.orders-table td { padding: 0.75rem 1rem; vertical-align: middle; }
+.orders-link { color: #3219E3; }
+.orders-link:hover { color: #0F0673; }
+.orders-buy-again-btn {
+    background: #1e293b;
+    color: #fff;
+    border: none;
+    border-radius: 9999px;
+    padding: 0.35rem 0.85rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+.orders-buy-again-btn:hover { background: #0f172a; color: #fff; }
+.orders-empty { border-radius: 0 0 12px 12px; }
+</style>
+@endpush

@@ -121,8 +121,7 @@
                     modal.find('.amount').text(price);
                     modal.find('.pcs').text(qty);
                     modal.find('[name=id]').val(id);
-
-                    $('[name=qty]').attr('max', parseInt(qty));
+                    modal.find('[name=qty]').val(1).attr('max', parseInt(qty) || 999);
                     modal.modal('show');
                 });
 

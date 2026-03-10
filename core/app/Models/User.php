@@ -55,6 +55,11 @@ class User extends Authenticatable
         return $this->hasMany(Deposit::class)->where('status','!=',Status::PAYMENT_INITIATE);
     }
 
+    public function reseller()
+    {
+        return $this->hasOne(Reseller::class);
+    }
+
     public function fullname(): Attribute
     {
         return new Attribute(

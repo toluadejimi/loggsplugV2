@@ -27,11 +27,65 @@
     <link rel="stylesheet"
           href="{{ url('') }}/assets/assets/vendor/bootstrap-touchspin/dist/jquery.bootstrap-touchspin.min.css">
     <link rel="stylesheet" href="{{ url('') }}/assets/assets/vendor/swiper/swiper-bundle.min.css">
-
+    @stack('style')
 
     <style>
-
-
+        .promo-bar {
+            background: linear-gradient(90deg, #0F0673 0%, #3219E3 50%, #B00BD9 100%);
+            background-size: 200% 100%;
+            color: #fff;
+            text-align: center;
+            padding: 12px 16px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+            animation: promo-bar-bg 6s ease-in-out infinite;
+        }
+        .promo-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            animation: promo-bar-shine 3s ease-in-out infinite;
+        }
+        @keyframes promo-bar-bg {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        @keyframes promo-bar-shine {
+            0% { left: -100%; }
+            60%, 100% { left: 100%; }
+        }
+        .promo-bar__link {
+            color: #fff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            position: relative;
+            z-index: 1;
+            transition: transform 0.2s ease;
+        }
+        .promo-bar__link:hover {
+            color: rgba(255,255,255,0.95);
+            transform: scale(1.02);
+        }
+        .promo-bar__emoji {
+            display: inline-block;
+            animation: promo-bar-bounce 1.5s ease-in-out infinite;
+        }
+        .promo-bar__emoji--right {
+            animation-delay: 0.25s;
+        }
+        @keyframes promo-bar-bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
 
         #christmas-snow {
             position: fixed;
@@ -135,8 +189,74 @@
             }
         }
 
-
-
+        /* Modern dashboard sidebar */
+        .dashboard-sidebar {
+            background: linear-gradient(180deg, #fafbff 0%, #f1f5f9 100%);
+            border-right: 1px solid rgba(0, 0, 0, 0.06);
+        }
+        .dashboard-sidebar__inner {
+            padding: 0.5rem 0;
+        }
+        .dashboard-sidebar .sidebar-list {
+            list-style: none;
+            padding: 0 0.75rem;
+            margin: 0;
+        }
+        .dashboard-sidebar .sidebar-list__item,
+        .dashboard-sidebar .sidebar-list > li {
+            margin-bottom: 0.25rem;
+        }
+        .dashboard-sidebar .sidebar-list__link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.6rem 0.85rem;
+            border-radius: 10px;
+            color: #475569;
+            font-weight: 500;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+        .dashboard-sidebar .sidebar-list__link:hover {
+            background: rgba(49, 25, 227, 0.08);
+            color: #3219E3;
+        }
+        .dashboard-sidebar .sidebar-list__link:hover .icon,
+        .dashboard-sidebar .sidebar-list__link:hover .icon-active {
+            opacity: 1;
+        }
+        .dashboard-sidebar .sidebar-list__icon {
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .dashboard-sidebar .sidebar-list__icon .icon {
+            transition: opacity 0.2s ease;
+        }
+        .dashboard-sidebar .sidebar-list__icon .icon-active {
+            display: none;
+        }
+        .dashboard-sidebar .sidebar-list__link:hover .icon:not(.icon-active) {
+            opacity: 0.7;
+        }
+        .dashboard-sidebar .sidebar-list__link .text {
+            flex: 1;
+        }
+        .dashboard-sidebar hr {
+            border: none;
+            border-top: 1px solid rgba(0, 0, 0, 0.06);
+            margin: 0.5rem 0.75rem;
+        }
+        .dashboard-sidebar .logo {
+            padding: 0 0.75rem;
+        }
+        .dashboard-sidebar .favicon {
+            padding: 0 0.75rem;
+        }
     </style>
 
     <style>
@@ -145,36 +265,51 @@
             bottom: 0;
             left: 0;
             right: 0;
-            height: 65px;
+            height: 64px;
             background: #fff;
             display: flex;
             justify-content: space-around;
             align-items: center;
-            border-top: 1px solid #e2e2e2;
-            box-shadow: 0 -1px 8px rgba(0, 0, 0, 0.1);
+            padding: 0 0.5rem;
+            border-top: 1px solid #e2e8f0;
+            box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.06);
             z-index: 999;
-            transition: all 0.3s ease-in-out;
+            transition: all 0.2s ease;
         }
 
         .footer-link {
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
             text-decoration: none;
-            color: #444;
-            font-size: 11px;
+            color: #64748b;
+            font-size: 0.65rem;
+            font-weight: 500;
+            padding: 0.4rem 0.6rem;
+            border-radius: 10px;
+            transition: color 0.2s ease, background 0.2s ease;
         }
 
-        .footer-link img {
+        .footer-link img,
+        .footer-link i {
             width: 22px;
             height: 22px;
-            margin-bottom: 3px;
+            margin-bottom: 2px;
+            display: block;
+            object-fit: contain;
+        }
+        .footer-link i {
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .footer-link:active,
         .footer-link:hover {
-            color: #007bff;
+            color: #3219E3;
+            background: rgba(49, 25, 227, 0.06);
         }
-
     </style>
 
 
@@ -376,7 +511,7 @@
                         </li>
 
 
-                        <li class="/user/orders">
+                        <li class="sidebar-list__item">
                             <a href="/user/orders" class="sidebar-list__link">
                                 <span class="sidebar-list__icon">
                                     <img src="{{ url('') }}/assets/assets2/images/icons/sidebar-icon12.svg" alt=""
@@ -389,9 +524,28 @@
                             </a>
                         </li>
 
+                        <li>
+                            <a href="{{ route('user.reseller.index') }}" class="sidebar-list__link">
+                                <span class="sidebar-list__icon">
+                                    <i class="las la-store icon" style="font-size: 1.4rem;"></i>
+                                    <i class="las la-store icon icon-active" style="font-size: 1.4rem;"></i>
+                                </span>
+                                <span class="text">Reseller</span>
+                            </a>
+                        </li>
 
                         <li>
-                            <a href="/user/send-gift" class="sidebar-list__link">
+                            <a href="{{ route('user.profile.setting') }}" class="sidebar-list__link">
+                                <span class="sidebar-list__icon">
+                                    <i class="las la-user-circle icon" style="font-size: 1.4rem;"></i>
+                                    <i class="las la-user-circle icon icon-active" style="font-size: 1.4rem;"></i>
+                                </span>
+                                <span class="text">Profile</span>
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="https://jollyboxfr.com/" class="sidebar-list__link">
                                 <span class="sidebar-list__icon">
                                     <img src="{{ url('') }}/assets/assets2/images/icons/sidebar-icon14.svg" alt=""
                                          class="icon">
@@ -579,6 +733,14 @@
             </div>
             <!-- Dashboard Nav End -->
 
+            <!-- Promo bar -->
+            <div class="promo-bar">
+                <a href="{{ route('user.reseller.index') }}" class="promo-bar__link">
+                <span class="promo-bar__emoji">💰</span>
+                Earn up to ₦500k daily with our reseller program
+                <span class="promo-bar__emoji promo-bar__emoji--right">🚀</span>
+            </a>
+            </div>
 
             @yield('content')
 
@@ -612,6 +774,15 @@
                     <span>Orders</span>
                 </a>
 
+                <a href="{{ route('user.reseller.index') }}" class="footer-link">
+                    <i class="las la-store" style="font-size: 1.35rem;"></i>
+                    <span>Reseller</span>
+                </a>
+
+                <a href="{{ route('user.profile.setting') }}" class="footer-link">
+                    <i class="las la-user-circle" style="font-size: 1.35rem;"></i>
+                    <span>Profile</span>
+                </a>
 
                 <a href="/contact" class="footer-link">
                     <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -682,6 +853,7 @@
 <script src="{{ url('') }}/assets/assets/js/settings.js"></script>
 <script src="{{ url('') }}/assets/assets/js/custom.js"></script>
 <script src="index.js" defer></script>
+@stack('script')
 
 <script>
     $(".stepper").TouchSpin();
@@ -697,21 +869,33 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    document.getElementById('buyNowBtn').addEventListener('click', function () {
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "Do you want to proceed with this purchase?",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#0F0673',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, buy it!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                document.getElementById('buyForm').submit();
-            }
+    (function() {
+        var buyBtn = document.getElementById('buyNowBtn');
+        var buyForm = document.getElementById('buyForm');
+        if (!buyBtn || !buyForm) return;
+        buyBtn.addEventListener('click', function () {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "Do you want to proceed with this purchase?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#0F0673',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, buy it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    var qtyInput = buyForm.querySelector('input[name="qty"]');
+                    if (qtyInput) {
+                        var qty = parseInt(qtyInput.value, 10) || 1;
+                        qty = Math.max(1, Math.min(100, qty));
+                        qtyInput.value = qty;
+                    }
+                    buyBtn.disabled = true;
+                    buyForm.submit();
+                }
+            });
         });
-    });
+    })();
 </script>
 
 
@@ -735,11 +919,51 @@
         }
         lastScroll = currentScroll;
     });
+
+    // Scroll to top: show after scroll, click to scroll
+    (function() {
+        var scrollTop = document.querySelector('.scroll-top');
+        if (scrollTop) {
+            window.addEventListener('scroll', function() {
+                if (window.pageYOffset > 300) scrollTop.classList.add('show'); else scrollTop.classList.remove('show');
+            });
+            scrollTop.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        }
+    })();
 </script>
+<style>
+.scroll-top {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    text-decoration: none;
+    box-shadow: 0 4px 14px rgba(99, 102, 241, .4);
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .25s, visibility .25s, transform .2s;
+}
+.scroll-top:hover { color: #fff; transform: translateY(-2px); }
+.scroll-top.show { opacity: 1; visibility: visible; }
+</style>
 
 
 
 
+
+<a href="#" class="scroll-top" aria-label="Scroll to top"><i class="las la-long-arrow-alt-up"></i></a>
 
 <a href="https://t.me/loggsplugcare0"
    class="telegram-float"

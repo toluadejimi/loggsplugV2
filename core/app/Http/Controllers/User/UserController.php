@@ -424,15 +424,19 @@ class UserController extends Controller
     {
         $pageTitle = 'Order Details';
         $order = Order::where('user_id', auth()->id())->where('status', Status::ORDER_PAID)->findOrFail($id);
-        $orderItems = OrderItem::whereIn('id', $order->orderItems->pluck('id') ?? [])->with('product', 'productDetail')->paginate(getPaginate());
-        $orderd = OrderItem::whereIn('id', $order->orderItems->pluck('id') ?? [])->with('productDetail')->get();
+        $orderItemIds = $order->orderItems->pluck('id')->toArray();
+        $orderItems = OrderItem::whereIn('id', $orderItemIds)->with('product', 'productDetail')->get();
+        $orderd = OrderItem::whereIn('id', $orderItemIds)->with('productDetail')->get();
 
-        foreach ($orderd as $product)
-        {
-            $item[] = $product->productDetail->id;
+        $item = [];
+        foreach ($orderd as $orderItem) {
+            if ($orderItem->productDetail !== null) {
+                $item[] = $orderItem->productDetail->id;
+            }
         }
-
-        $update = ProductDetail::whereIn('id', $item)->update(['is_sold'=>Status::YES]);
+        if (!empty($item)) {
+            ProductDetail::whereIn('id', $item)->update(['is_sold' => Status::YES]);
+        }
 
         $get_id = $id;
 
@@ -443,13 +447,14 @@ class UserController extends Controller
 
     public function copy($id)
     {
-
         $order = Order::where('user_id', auth()->id())->where('status', Status::ORDER_PAID)->findOrFail($id);
-        $copyall = OrderItem::whereIn('id', $order->orderItems->pluck('id') ?? [])->with('product', 'productDetail')->get();
+        $copyall = OrderItem::whereIn('id', $order->orderItems->pluck('id')->toArray())->with('product', 'productDetail')->get();
 
         $result = [];
-        foreach ($copyall as $data){
-            $result[] = $data->productDetail->details;
+        foreach ($copyall as $data) {
+            if ($data->productDetail !== null && $data->productDetail->details !== null) {
+                $result[] = $data->productDetail->details;
+            }
         }
 
         $text = implode(PHP_EOL, $result);

@@ -7,25 +7,19 @@
     <title> {{ $general->siteName(__($pageTitle)) }}</title>
 
     @include('partials.seo')
-    <link href="{{ asset('assets/global/css/bootstrap.min.css') }}" rel="stylesheet">
-    <link href="{{ asset('assets/global/css/all.min.css') }}" rel="stylesheet"> 
-
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-    
-    <link rel="stylesheet" href="{{ asset('assets/global/css/line-awesome.min.css') }}" />
-    <link rel="stylesheet" href="{{ asset($activeTemplateTrue . 'css/owl.theme.default.min.css') }}">
-    <link rel="stylesheet" href="{{ asset($activeTemplateTrue . 'css/owl.carousel.min.css') }}">
-    <link rel="stylesheet" href="{{ asset($activeTemplateTrue . 'css/odometer.css') }}">
- 
+    <!-- Same CSS as /products (layouts.main) -->
+    <link rel="shortcut icon" href="{{ url('') }}/assets/assets2/images/logo/favicon.png">
+    <link rel="stylesheet" href="{{ url('') }}/assets/assets2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url('') }}/assets/assets2/css/fontawesome-all.min.css">
+    <link rel="stylesheet" href="{{ url('') }}/assets/assets2/css/slick.css">
+    <link rel="stylesheet" href="{{ url('') }}/assets/assets2/css/magnific-popup.css">
+    <link rel="stylesheet" href="{{ url('') }}/assets/assets2/css/line-awesome.min.css">
+    <link rel="stylesheet" href="{{ url('') }}/assets/assets2/css/main.css">
+    <link rel="stylesheet" href="{{ url('') }}/assets/assets2/css/swipper.min.css">
+    <link rel="stylesheet" href="{{ url('') }}/assets/assets/vendor/bootstrap-touchspin/dist/jquery.bootstrap-touchspin.min.css">
+    <link rel="stylesheet" href="{{ url('') }}/assets/assets/vendor/swiper/swiper-bundle.min.css">
     @stack('style-lib')
-
-    <link rel="stylesheet" href="{{ asset($activeTemplateTrue . 'css/main.css') }}">
-    <link rel="stylesheet" href="{{ asset($activeTemplateTrue . 'css/custom.css') }}">
-
     @stack('style')
-
-    <link rel="stylesheet" href="{{ asset($activeTemplateTrue . 'css/color.php') }}?color={{ $general->base_color }}">
 </head>
 
 <body>
@@ -37,7 +31,7 @@
 
     <div class="body-overlay"></div>
     <div class="sidebar-overlay"></div>
-    <a class="scroll-top"><i class="las la-long-arrow-alt-up"></i></a>
+    <a href="#" class="scroll-top" aria-label="Scroll to top"><i class="las la-long-arrow-alt-up"></i></a>
 
     @yield('app')
 
@@ -59,15 +53,25 @@
         </div>
     @endif
 
-    <script src="{{ asset('assets/global/js/jquery-3.6.0.min.js') }}"></script>
-    <script src="{{ asset('assets/global/js/bootstrap.bundle.min.js') }}"></script>
-
-    <script src="{{ asset($activeTemplateTrue . 'js/owl.carousel.min.js') }}"></script>
-    <script src="{{ asset($activeTemplateTrue . 'js/owl.carousel.filter.js') }}"></script>
-    <script src="{{ asset($activeTemplateTrue . 'js/odometer.min.js') }}"></script>
-    <script src="{{ asset($activeTemplateTrue . 'js/viewport.jquery.js') }}"></script>
-    <script src="{{ asset($activeTemplateTrue . 'js/main.js') }}"></script>
-
+    <!-- Same JS as /products (layouts.main) -->
+    <script src="{{ url('') }}/assets/assets2/js/jquery-3.7.1.min.js"></script>
+    <script src="{{ url('') }}/assets/assets2/js/boostrap.bundle.min.js"></script>
+    <script src="{{ url('') }}/assets/assets2/js/countdown.js"></script>
+    <script src="{{ url('') }}/assets/assets2/js/counterup.min.js"></script>
+    <script src="{{ url('') }}/assets/assets2/js/slick.min.js"></script>
+    <script src="{{ url('') }}/assets/assets2/js/jquery.magnific-popup.js"></script>
+    <script src="{{ url('') }}/assets/assets2/js/apexchart.js"></script>
+    <script src="{{ url('') }}/assets/assets2/js/demo.js"></script>
+    <script src="{{ url('') }}/assets/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url('') }}/assets/assets/vendor/swiper/swiper-bundle.min.js"></script>
+    <script src="{{ url('') }}/assets/assets/js/dz.carousel.js"></script>
+    <script src="{{ url('') }}/assets/assets/vendor/bootstrap-touchspin/dist/jquery.bootstrap-touchspin.min.js"></script>
+    <script src="{{ url('') }}/assets/assets/js/settings.js"></script>
+    <script src="{{ url('') }}/assets/assets/js/custom.js"></script>
+    <script src="{{ url('') }}/assets/assets2/js/main.js"></script>
+    <script src="{{ url('') }}/assets/assets2/js/js1.js"></script>
+    <script src="{{ url('') }}/assets/assets2/js/js2.js"></script>
+    <script src="{{ url('') }}/assets/assets2/js/js3.js"></script>
     @stack('script-lib')
     
     @stack('script')
@@ -114,8 +118,43 @@
                 }
             });
 
+            // Scroll to top: show after scroll, click to scroll
+            var $scrollTop = $('.scroll-top');
+            if ($scrollTop.length) {
+                $(window).on('scroll', function() {
+                    if (window.pageYOffset > 300) $scrollTop.addClass('show'); else $scrollTop.removeClass('show');
+                });
+                $scrollTop.on('click', function(e) {
+                    e.preventDefault();
+                    $('html, body').animate({ scrollTop: 0 }, 400);
+                });
+            }
         })(jQuery);
     </script>
+    <style>
+    .scroll-top {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        text-decoration: none;
+        box-shadow: 0 4px 14px rgba(99, 102, 241, .4);
+        z-index: 999;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity .25s, visibility .25s, transform .2s;
+    }
+    .scroll-top:hover { color: #fff; transform: translateY(-2px); }
+    .scroll-top.show { opacity: 1; visibility: visible; }
+    </style>
 </body>
 
 </html>

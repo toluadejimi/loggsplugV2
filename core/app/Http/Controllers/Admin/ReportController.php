@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use App\Constants\Status;
 use App\Models\Product;
 use App\Models\ProductDetail;
+use App\Models\Reseller;
 
 class ReportController extends Controller
 {
@@ -96,6 +97,21 @@ class ReportController extends Controller
         return view('admin.product.account',compact('pageTitle', 'accounts', 'order'));
     }
 
+    /**
+     * Reseller-reported orders (reported to main site so admin can replace product).
+     */
+    public function resellerReportedOrders(Request $request)
+    {
+        $pageTitle = 'Reseller reported orders';
+
+        $orders = Order::query()
+            ->whereNotNull('reported_at')
+            ->with(['user:id,username,email', 'reseller:id,user_id,business_name', 'reseller.user:id,email', 'orderItems.product'])
+            ->orderByDesc('reported_at')
+            ->paginate(getPaginate());
+
+        return view('admin.reports.reseller_reported_orders', compact('pageTitle', 'orders'));
+    }
 }
 
 

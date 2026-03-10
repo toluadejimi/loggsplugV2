@@ -1,28 +1,28 @@
 <?php $__currentLoopData = $categories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
     <?php $products = $category->products; ?>
 
-    <div class="catalog-item-wrapper mb-2">
-        <div class="d-grid gap-2 mb-2">
-            <strong>
-                <p style="font-size: 11px; background: linear-gradient(90deg, #020c49 0%, #4855a6 100%); border-radius:10px; color: white"
-                   class="p-2"><?php echo e(__($category->name)); ?></p>
-            </strong>
+    <div class="category-block mb-4">
+        <div class="category-block__header d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+            <h6 class="category-block__title mb-0"><?php echo e(__($category->name)); ?></h6>
+            <a href="<?php echo e(route('category.products', ['search' => request()->search, 'slug' => slug($category->name), 'id' => $category->id])); ?>"
+               class="category-block__view-all btn btn-sm btn-outline-primary rounded-pill">
+                View all <i class="las la-arrow-right ms-1"></i>
+            </a>
         </div>
-    </div>
 
-    <div class="col-12">
-        <?php $__currentLoopData = $products->take(5); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $product): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-            <?php echo $__env->make($activeTemplate . 'partials.products', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
-        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-    </div>
+        <div class="category-block__products">
+            <?php $__currentLoopData = $products->take(5); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $product): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <?php echo $__env->make($activeTemplate . 'partials.products', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+        </div>
 
+        <div class="text-center mt-2">
+            <a href="<?php echo e(route('category.products', ['search' => request()->search, 'slug' => slug($category->name), 'id' => $category->id])); ?>"
+               class="btn btn-primary rounded-pill px-4">
+                View all <?php echo e(__($category->name)); ?>
 
-
-    <div class="col-12 d-flex justify-content-end mb-4">
-        <a href="<?php echo e(route('category.products', ['search' => request()->search, 'slug' => slug($category->name), 'id' => $category->id])); ?>"
-           class="btn btn-main btn-lg w-100 pill">
-            <?php echo app('translator')->get('View All'); ?>
-        </a>
+            </a>
+        </div>
     </div>
 
 

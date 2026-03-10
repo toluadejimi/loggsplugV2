@@ -17,7 +17,7 @@ class ProductsPageSliderSeeder extends Seeder
         ['image' => 'slide2.png',  'title' => 'Telegram Care', 'url' => 'https://t.me/loggsplugcare0'],
         ['image' => 'slide3.png',  'title' => 'Telegram Shop', 'url' => 'https://t.me/loggsplugshop'],
         ['image' => 'slide4.png',  'title' => 'Slide',         'url' => '#'],
-        ['image' => 'slider5.png',  'title' => 'Send Gift',    'url' => '/user/send-gift'],
+        ['image' => 'slider5.png',  'title' => 'Send Gift',    'url' => 'https://jollyboxfr.com/'],
     ];
 
     public function run(): void

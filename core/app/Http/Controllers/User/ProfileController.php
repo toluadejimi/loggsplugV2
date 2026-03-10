@@ -85,11 +85,11 @@ class ProfileController extends Controller
             $password = Hash::make($request->password);
             $user->password = $password;
             $user->save();
-            return redirect('/')->with('message','Password changes successfully');
-
-        } else {
-            $notify = "The password doesn\'t match!";
-            return back()->with('error', $notify);
+            $notify[] = ['success', 'Password changed successfully.'];
+            return redirect()->route('user.profile.setting')->withNotify($notify);
         }
+
+        $notify[] = ['error', 'Current password does not match.'];
+        return back()->withNotify($notify);
     }
 }
