@@ -482,6 +482,29 @@
     color: #475569;
 }
 .udashboard__muted { color: #94a3b8; }
+
+/* Latest Payments status badges – ensure visible */
+.udashboard__table td .badge {
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.35rem 0.7rem;
+    border-radius: 9999px;
+    color: #fff !important;
+}
+.udashboard__table td .badge--warning,
+.udashboard__table td .badge--dark {
+    background: #64748b !important;
+    color: #fff !important;
+}
+.udashboard__table td .badge--success {
+    background: #15803d !important;
+    color: #fff !important;
+}
+.udashboard__table td .badge--danger {
+    background: #b91c1c !important;
+    color: #fff !important;
+}
+
 .udashboard__btn-resolve {
     display: inline-block;
     padding: 6px 12px;

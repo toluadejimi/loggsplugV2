@@ -454,7 +454,17 @@
     font-weight: 600;
     white-space: nowrap;
 }
-.product-card__btn--lock { font-size: 0.8rem; }
+.product-card__btn--lock {
+    font-size: 0.8rem;
+    background: #1e293b !important;
+    color: #fff !important;
+    border: 1px solid #1e293b !important;
+}
+.product-card__btn--lock:hover {
+    background: #0f172a !important;
+    color: #fff !important;
+    border-color: #0f172a !important;
+}
 
 /* Category blocks */
 .category-block__header { padding: 0 0.15rem; }
