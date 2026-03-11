@@ -10,6 +10,16 @@ if (!file_exists(__DIR__ . '/config.php')) {
     die('Please copy config.sample.php to config.php and set your API key and API_BASE_URL.');
 }
 require_once __DIR__ . '/config.php';
+
+// Ensure includes directory and required files exist (prevents "Failed to open stream" on deploy)
+$includesDir = __DIR__ . '/includes';
+$requiredIncludes = ['head.php', 'header.php', 'footer.php'];
+foreach ($requiredIncludes as $file) {
+    if (!is_file($includesDir . '/' . $file)) {
+        header('Content-Type: text/plain; charset=utf-8');
+        die('Missing file: includes/' . $file . '. Upload the full reseller-site folder including the includes/ directory (head.php, header.php, footer.php). Path checked: ' . $includesDir . '/' . $file);
+    }
+}
 $dbPath = defined('DB_PATH') ? DB_PATH : '';
 if ($dbPath !== '') {
     require_once __DIR__ . '/init_db.php';

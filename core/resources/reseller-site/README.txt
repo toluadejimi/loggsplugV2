@@ -15,7 +15,9 @@ CALLBACK URL (SprintPay / e_fund)
   https://your-domain/fund_callback.php   (no "reseller-site" in path)
 - When the main Laravel app serves the callback (same domain as main site), use:
   https://your-domain/reseller-site/fund_callback
-3. Upload this folder to your server (PHP with curl, PDO SQLite enabled)
+3. Upload this folder to your server (PHP with curl, PDO SQLite enabled).
+   Required structure: keep the includes/ folder and its files (head.php, header.php, footer.php).
+   If you see "Failed to open stream ... includes/head.php", the includes/ directory was not uploaded or is in the wrong place.
 4. Ensure config.php is not publicly readable; keep it outside the web root if possible.
 
 SETTLEMENT ACCOUNT
