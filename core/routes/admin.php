@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
+use Rap2hpoutre\LaravelLogViewer\LogViewerController;
 
 Route::namespace('Auth')->group(function () {
     Route::controller('LoginController')->group(function () {
@@ -26,6 +26,8 @@ Route::namespace('Auth')->group(function () {
 
 Route::middleware('admin')->group(function () {
     Route::get('/', fn () => redirect()->route('admin.dashboard'))->name('index');
+
+    Route::get('logs', [LogViewerController::class, 'index'])->name('logs');
 
     Route::controller('AdminController')->group(function(){
         Route::get('dashboard', 'dashboard')->name('dashboard');

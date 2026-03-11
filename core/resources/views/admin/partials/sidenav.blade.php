@@ -508,6 +508,13 @@
                         <span class="menu-title">@lang('Report & Request') </span>
                     </a>
                 </li>
+
+                <li class="sidebar-menu-item {{request()->is('admin/logs*') ? 'active' : ''}}">
+                    <a href="{{ route('admin.logs') }}" class="nav-link" target="_blank">
+                        <i class="menu-icon las la-file-alt"></i>
+                        <span class="menu-title">@lang('Log Viewer')</span>
+                    </a>
+                </li>
             </ul>
             <div class="text-center mb-3 text-uppercase">
                 <span class="text--primary">{{__(systemDetails()['name'])}}</span>

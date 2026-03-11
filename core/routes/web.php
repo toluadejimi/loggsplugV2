@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\ProxyController;
 use Illuminate\Support\Facades\Route;
-use Rap2hpoutre\LaravelLogViewer\LogViewerController;
 
 Route::get('/reseller-site/download', \App\Http\Controllers\ResellerSiteDownloadController::class)->name('reseller-site.download');
 
@@ -18,9 +17,6 @@ Route::get('/proxy', [ProxyController::class, 'proxy']);
 
 
 Route::get('verify', 'Gateway\Enkpay\ProcessController@ipn')->name('enkpay');
-
-Route::get('logs', [LogViewerController::class, 'index']);
-
 
 
 
