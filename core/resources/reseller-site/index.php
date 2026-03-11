@@ -66,8 +66,12 @@ if ($apiKey && $baseUrl) {
         }
     } else {
         if ($res) {
-            $data = json_decode($res, true);
-            $error = isset($data['message']) ? $data['message'] : ('HTTP ' . $code . '. Check API key and reseller status on the platform.');
+            $data = is_string($res) ? json_decode($res, true) : null;
+            if (is_array($data) && isset($data['message']) && (string) $data['message'] !== '') {
+                $error = $data['message'];
+            } else {
+                $error = 'HTTP ' . $code . '. Check API key and reseller status on the platform. If the key is correct, the key may be revoked or the reseller suspended – check Admin → Resellers on ' . parse_url($baseUrl, PHP_URL_HOST) . '.';
+            }
         } else {
             $error = $curlError ? 'Connection error: ' . $curlError : 'Could not reach ' . $baseUrl . '. Check API_BASE_URL and server connectivity.';
         }
@@ -255,15 +259,18 @@ require __DIR__ . '/includes/header.php';
                 <div class="reseller-product-card product-card" data-name="<?php echo htmlspecialchars(strtolower($p['name'])); ?>" data-category="<?php echo htmlspecialchars($catName); ?>" <?php echo $isMore ? ' style="display:none;" data-more="1"' : ''; ?>>
                     <div class="reseller-product-card__img-wrap">
                         <?php if ($imgUrl): ?>
-                            <img src="<?php echo htmlspecialchars($imgUrl); ?>" alt="<?php echo htmlspecialchars($p['name']); ?>" class="reseller-product-card__img" loading="lazy">
+                            <img src="<?php echo htmlspecialchars($imgUrl); ?>" alt="<?php echo htmlspecialchars($p['name']); ?>" class="reseller-product-card__img" loading="lazy" referrerpolicy="no-referrer" decoding="async" onerror="this.onerror=null;this.style.display='none';var f=this.nextElementSibling;if(f)f.classList.add('reseller-product-card__img-placeholder--show');">
+                            <div class="reseller-product-card__img-placeholder reseller-product-card__img-placeholder--fallback" aria-hidden="true">No image</div>
                         <?php else: ?>
                             <div class="reseller-product-card__img-placeholder" aria-hidden="true">No image</div>
                         <?php endif; ?>
                     </div>
                     <div class="reseller-product-card__body">
                         <h3 class="reseller-product-card__title"><?php echo htmlspecialchars($p['name']); ?></h3>
-                        <p class="reseller-product-card__amount"><strong>₦<?php echo number_format($p['amount'], 2); ?></strong></p>
-                        <p class="reseller-product-card__stock text-muted">Stock: <?php echo (int)$p['in_stock']; ?></p>
+                        <div class="reseller-product-card__meta">
+                            <span class="card__pill reseller-product-card__pill reseller-product-card__pill--amount">₦<?php echo number_format($p['amount'], 2); ?></span>
+                            <span class="card__pill reseller-product-card__pill reseller-product-card__pill--stock">Stock: <?php echo (int)$p['in_stock']; ?></span>
+                        </div>
                         <?php if ($canOrder): ?>
                         <form method="post" class="reseller-product-card__form">
                             <input type="hidden" name="product_id" value="<?php echo (int)$p['id']; ?>">
@@ -273,7 +280,9 @@ require __DIR__ . '/includes/header.php';
                             </button>
                         </form>
                         <?php else: ?>
-                        <p class="reseller-product-card__login-hint"><a href="login.php?redirect=<?php echo urlencode('index.php'); ?>">Login</a> to order</p>
+                        <a href="login.php?redirect=<?php echo urlencode('index.php'); ?>" class="reseller-product-card__login-btn" title="Login to order" aria-label="Login to order">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        </a>
                         <?php endif; ?>
                     </div>
                 </div>

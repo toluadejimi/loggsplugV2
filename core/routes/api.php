@@ -18,6 +18,14 @@ Route::any('verify-username', [ApiController::class, 'verify_username'])->name('
 
 /*
 |--------------------------------------------------------------------------
+| Reseller API – public image URL (no auth) so reseller sites can show product images
+| without hitting 403 from hotlink protection on /assets/...
+|--------------------------------------------------------------------------
+*/
+Route::get('reseller/product-image/{id}', [ResellerApiController::class, 'productImage'])->name('api.reseller.product-image');
+
+/*
+|--------------------------------------------------------------------------
 | Reseller API (authenticate with X-Api-Key or api_key in body)
 |--------------------------------------------------------------------------
 */

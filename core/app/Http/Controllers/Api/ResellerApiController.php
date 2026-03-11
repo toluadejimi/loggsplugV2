@@ -12,9 +12,37 @@ use App\Models\ProductDetail;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ResellerApiController extends Controller
 {
+    /**
+     * Serve product image by ID (public, no auth).
+     * GET /api/reseller/product-image/{id}
+     * Used so reseller sites can display images without 403 from hotlink protection on /assets/...
+     */
+    public function productImage(int $id): BinaryFileResponse|JsonResponse
+    {
+        $product = Product::active()->find($id);
+        if (!$product || empty($product->image)) {
+            return response()->json(['message' => 'Not found'], 404);
+        }
+        $path = public_path('assets/images/product/' . $product->image);
+        if (!is_file($path) || !is_readable($path)) {
+            return response()->json(['message' => 'Image not found'], 404);
+        }
+        $mime = match (strtolower(pathinfo($path, PATHINFO_EXTENSION))) {
+            'png' => 'image/png',
+            'gif' => 'image/gif',
+            'webp' => 'image/webp',
+            default => 'image/jpeg',
+        };
+        return response()->file($path, [
+            'Content-Type' => $mime,
+            'Cache-Control' => 'public, max-age=86400',
+        ]);
+    }
+
     /**
      * List products with reseller price (base price minus admin discount %).
      * GET /api/reseller/products
@@ -34,7 +62,7 @@ class ResellerApiController extends Controller
                 $inStock = $product->unsoldProductDetails()->count();
                 $imageUrl = null;
                 if (!empty($product->image)) {
-                    $imageUrl = asset('assets/images/product/' . $product->image);
+                    $imageUrl = url('/api/reseller/product-image/' . $product->id);
                 }
                 return [
                     'id' => $product->id,
