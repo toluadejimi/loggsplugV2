@@ -97,7 +97,7 @@
                     <div class="card-header deposit-history-header border-0">
                         <h5 class="deposit-history-title mb-0">
                             <i class="las la-history"></i>
-                            Latest payment history
+                            Payment History
                         </h5>
                     </div>
                     <div class="card-body p-0">
@@ -319,17 +319,29 @@
     background: #fff;
 }
 
-/* Status pills – clear contrast */
+/* Status pills – high visibility */
 .deposit-status {
     display: inline-block;
-    padding: 0.3rem 0.7rem;
-    font-size: 0.8rem;
-    font-weight: 600;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 700;
     border-radius: 9999px;
+    color: #fff !important;
+    text-align: center;
+    white-space: nowrap;
 }
-.deposit-status--success { background: #dcfce7; color: #166534; }
-.deposit-status--pending { background: #fef3c7; color: #92400e; }
-.deposit-status--rejected { background: #fee2e2; color: #991b1b; }
+.deposit-status--success {
+    background: #15803d !important;
+    color: #fff !important;
+}
+.deposit-status--pending {
+    background: #b45309 !important;
+    color: #fff !important;
+}
+.deposit-status--rejected {
+    background: #b91c1c !important;
+    color: #fff !important;
+}
 
 .deposit-history-pagination { background: #fff; }
 </style>
