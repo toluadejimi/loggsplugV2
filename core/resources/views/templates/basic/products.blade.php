@@ -480,6 +480,10 @@
 .category-block__view-all {
     font-size: 0.85rem;
     font-weight: 600;
+    color: #3219E3;
+}
+.category-block__view-all:hover {
+    color: #0F0673 !important;
 }
 
 /* Flash buy toast - left aligned */

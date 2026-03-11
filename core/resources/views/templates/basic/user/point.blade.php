@@ -34,7 +34,12 @@
                         <div class="p-3">
                             <div class="card-body">
                                 <h6>Amount</h6>
-                                <p>NGN {{number_format($amount, 2 ?? 0.0)}}</p>
+                                <p class="point-copy-row d-flex align-items-center gap-2 flex-wrap">
+                                    <span class="point-copy-value" id="point-amount">NGN {{ number_format($amount ?? 0, 2) }}</span>
+                                    <button type="button" class="point-copy-btn btn btn-sm btn-outline-secondary" data-copy-target="point-amount" title="Copy amount" aria-label="Copy amount">
+                                        <i class="las la-copy"></i>
+                                    </button>
+                                </p>
                             </div>
                         </div>
 
@@ -57,7 +62,12 @@
                         <div class="p-3">
                             <div class="card-body">
                                 <h6 class="mb-2">Account No</h6>
-                                <p>{{$account_no ?? "Not Available"}}</p>
+                                <p class="point-copy-row d-flex align-items-center gap-2 flex-wrap">
+                                    <span class="point-copy-value" id="point-account-no">{{ $account_no ?? "Not Available" }}</span>
+                                    <button type="button" class="point-copy-btn btn btn-sm btn-outline-secondary" data-copy-target="point-account-no" title="Copy account number" aria-label="Copy account number">
+                                        <i class="las la-copy"></i>
+                                    </button>
+                                </p>
                             </div>
                         </div>
 
@@ -84,3 +94,51 @@
         </div>
 
 @endsection
+
+@push('script')
+<script>
+(function() {
+    document.querySelectorAll('.point-copy-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var id = this.getAttribute('data-copy-target');
+            var el = document.getElementById(id);
+            if (!el) return;
+            var text = (el.textContent || el.innerText || '').trim();
+            if (!text) return;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(function() {
+                    var icon = btn.querySelector('i');
+                    var cls = icon.className;
+                    icon.className = 'las la-check';
+                    btn.setAttribute('title', 'Copied!');
+                    setTimeout(function() {
+                        icon.className = cls;
+                        btn.setAttribute('title', id === 'point-amount' ? 'Copy amount' : 'Copy account number');
+                    }, 1500);
+                });
+            } else {
+                var ta = document.createElement('textarea');
+                ta.value = text;
+                ta.setAttribute('readonly', '');
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                try {
+                    document.execCommand('copy');
+                    var icon = btn.querySelector('i');
+                    var cls = icon.className;
+                    icon.className = 'las la-check';
+                    btn.setAttribute('title', 'Copied!');
+                    setTimeout(function() {
+                        icon.className = cls;
+                        btn.setAttribute('title', id === 'point-amount' ? 'Copy amount' : 'Copy account number');
+                    }, 1500);
+                } catch (e) {}
+                document.body.removeChild(ta);
+            }
+        });
+    });
+})();
+</script>
+@endpush
