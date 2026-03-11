@@ -2,8 +2,11 @@
     <?php $products = $category->products; ?>
 
     <div class="category-block mb-4">
-        <div class="category-block__header mb-3">
+        <div class="category-block__header mb-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
             <h6 class="category-block__title mb-0"><?php echo e(__($category->name)); ?></h6>
+            <a href="<?php echo e(route('category.products', ['slug' => $category->name, 'id' => $category->id])); ?>" class="category-block__view-all text-decoration-none">
+                View all <i class="las la-arrow-right"></i>
+            </a>
         </div>
 
         <div class="category-block__products">

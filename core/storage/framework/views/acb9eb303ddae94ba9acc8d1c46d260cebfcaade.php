@@ -35,8 +35,8 @@
             background-size: 200% 100%;
             color: #fff;
             text-align: center;
-            padding: 12px 16px;
-            font-size: 0.95rem;
+            padding: 10px 14px;
+            font-size: 0.8rem;
             font-weight: 600;
             position: relative;
             overflow: hidden;
@@ -66,10 +66,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.5rem;
+            gap: 0.4rem;
             position: relative;
             z-index: 1;
             transition: transform 0.2s ease;
+            font-size: 0.8rem;
         }
         .promo-bar__link:hover {
             color: rgba(255,255,255,0.95);
@@ -85,6 +86,18 @@
         @keyframes promo-bar-bounce {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-3px); }
+        }
+
+        /* Extra small screens: tighter promo bar + smaller text */
+        @media (max-width: 480px) {
+            .promo-bar {
+                padding: 8px 10px;
+                font-size: 0.72rem;
+            }
+            .promo-bar__link {
+                font-size: 0.72rem;
+                gap: 0.3rem;
+            }
         }
 
         #christmas-snow {
@@ -123,20 +136,19 @@
 
         .telegram-float {
             position: fixed;
-            right: 20px;              /* distance from left */
-            top: 80%;                /* vertically centered */
-            transform: translateY(-50%);
-            width: 60px;
-            height: 60px;
+            right: 16px;
+            bottom: 130px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             background: #0088cc;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #fff;
-            font-size: 30px;
+            font-size: 1.4rem;
             text-decoration: none;
-            box-shadow: 0 0 18px rgba(0, 136, 204, 0.9);
+            box-shadow: 0 4px 16px rgba(0, 136, 204, 0.4);
             z-index: 9999;
             cursor: pointer;
             animation: tg-pulse 2s infinite ease-in-out;
@@ -146,21 +158,29 @@
         .telegram-float::before {
             content: "";
             position: absolute;
-            inset: -8px;
+            inset: -6px;
             border-radius: 50%;
-            border: 2px solid rgba(0, 136, 204, 0.6);
+            border: 2px solid rgba(0, 136, 204, 0.5);
             animation: tg-glow 2s infinite ease-out;
         }
 
-        /* Hover effect */
         .telegram-float:hover {
-            transform: translateY(-50%) scale(1.05);
-            box-shadow: 0 0 25px rgb(212, 235, 246);
+            transform: scale(1.08);
+            box-shadow: 0 6px 20px rgba(0, 136, 204, 0.5);
         }
 
-        /* Icon alignment fix */
         .telegram-float i {
             position: relative;
+        }
+
+        @media (max-width: 767px) {
+            .telegram-float {
+                right: 12px;
+                bottom: 128px;
+                width: 44px;
+                height: 44px;
+                font-size: 1.25rem;
+            }
         }
 
         /* Main pulse */
@@ -257,6 +277,19 @@
         .dashboard-sidebar .favicon {
             padding: 0 0.75rem;
         }
+
+        .header-balance {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin: 0;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 480px) {
+            .header-balance {
+                font-size: 0.78rem;
+            }
+        }
     </style>
 
     <style>
@@ -265,7 +298,7 @@
             bottom: 0;
             left: 0;
             right: 0;
-            height: 64px;
+            height: 58px;
             background: #fff;
             display: flex;
             justify-content: space-around;
@@ -284,23 +317,23 @@
             justify-content: center;
             text-decoration: none;
             color: #64748b;
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             font-weight: 500;
-            padding: 0.4rem 0.6rem;
+            padding: 0.35rem 0.5rem;
             border-radius: 10px;
             transition: color 0.2s ease, background 0.2s ease;
         }
 
         .footer-link img,
         .footer-link i {
-            width: 22px;
-            height: 22px;
+            width: 20px;
+            height: 20px;
             margin-bottom: 2px;
             display: block;
             object-fit: contain;
         }
         .footer-link i {
-            font-size: 1.25rem;
+            font-size: 1.1rem;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -309,6 +342,23 @@
         .footer-link:hover {
             color: #3219E3;
             background: rgba(49, 25, 227, 0.06);
+        }
+
+        /* At very small widths (e.g. 352px), shrink footer labels/icons so they stay on one line */
+        @media (max-width: 380px) {
+            .mobile-footer-nav {
+                height: 54px;
+                padding: 0 0.35rem;
+            }
+            .footer-link {
+                font-size: 0.52rem;
+                padding: 0.25rem 0.4rem;
+            }
+            .footer-link img,
+            .footer-link i {
+                width: 18px;
+                height: 18px;
+            }
         }
     </style>
 
@@ -711,7 +761,7 @@
                                         <img src="<?php echo e(url('')); ?>/assets/assets2/images/icons/sidebar-icon11.svg" alt=""
                                              class="icon">
                                     </span>
-                                        <h6 class="mt-4" style="padding: 0px 0px;">
+                                        <h6 class="header-balance mb-0">
                                             N<?php echo e(number_format(Auth::user()->balance, 2)); ?></h6>
                                     </a>
                                     </span>
@@ -775,12 +825,12 @@
                 </a>
 
                 <a href="<?php echo e(route('user.reseller.index')); ?>" class="footer-link">
-                    <i class="las la-store" style="font-size: 1.35rem;"></i>
+                    <i class="las la-store" style="font-size: 1.1rem;"></i>
                     <span>Reseller</span>
                 </a>
 
                 <a href="<?php echo e(route('user.profile.setting')); ?>" class="footer-link">
-                    <i class="las la-user-circle" style="font-size: 1.35rem;"></i>
+                    <i class="las la-user-circle" style="font-size: 1.1rem;"></i>
                     <span>Profile</span>
                 </a>
 

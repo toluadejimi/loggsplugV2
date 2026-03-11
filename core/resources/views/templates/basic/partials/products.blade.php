@@ -23,9 +23,9 @@
                     <span class="badge bg-secondary">Out of stock</span>
                 @else
                     @auth
-                        <a href="/product/details/{{ $product->id }}" class="product-card__btn btn btn-primary btn-sm rounded-pill px-3 d-inline-flex align-items-center gap-1">
+                        <a href="/product/details/{{ $product->id }}" class="product-card__btn btn btn-primary btn-sm rounded-pill px-3 d-inline-flex align-items-center gap-1" title="View">
                             <i class="las la-shopping-cart"></i>
-                            <span>View</span>
+                            <span class="product-card__btn-text">View</span>
                         </a>
                     @else
                         <a href="/user/login" class="product-card__btn product-card__btn--lock btn btn-outline-dark btn-sm rounded-pill px-3">
