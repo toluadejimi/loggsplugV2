@@ -266,10 +266,13 @@
 }
 /* Mobile: 1 slide, taller image for better visibility */
 @media (max-width: 767px) {
-    .products-slider-wrap .products-slider-swiper { min-height: 220px; }
+    .products-slider-wrap .products-slider-swiper { min-height: 150px; }
     .products-slider-wrap .products-slider-swiper .swiper-slide { width: 100% !important; }
     .products-slider-wrap .products-slider-card { margin: 0; }
-    .products-slider-img { height: 220px; object-fit: cover; }
+    .products-slider-img {
+        height: 150px;
+        object-fit: fill;
+    }
 }
 @media (min-width: 768px) { .products-slider-img { height: 260px; } }
 .products-slider-wrap .swiper-btn-center-lr .swiper-btn-prev,
