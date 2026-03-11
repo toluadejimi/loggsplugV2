@@ -19,9 +19,12 @@ class ResellerSiteDownloadController extends Controller
 
         $apiKey = request()->query('api_key', '');
         $files = [
-            'config.sample.php', 'index.php', 'README.txt',
-            'init_db.php', 'auth_helpers.php', 'login.php', 'register.php', 'profile.php', 'wallet.php', 'fund.php', 'fund_callback.php', 'logout.php',
+            'config.sample.php', 'index.php', 'README.txt', 'create_includes.php',
+            'init_db.php', 'auth_helpers.php', 'admin_helpers.php',
+            'login.php', 'register.php', 'profile.php', 'wallet.php', 'fund.php', 'fund_callback.php', 'logout.php',
+            'order_details.php', 'my_orders.php',
         ];
+        $includesFiles = ['includes/head.php', 'includes/header.php', 'includes/footer.php'];
 
         $zip = new ZipArchive();
         $tempFile = tempnam(sys_get_temp_dir(), 'reseller-site');
@@ -39,6 +42,14 @@ class ResellerSiteDownloadController extends Controller
                 $content = str_replace("'your_api_key_here'", "'" . addslashes($apiKey) . "'", $content);
             }
             $zip->addFromString($name, $content);
+        }
+
+        foreach ($includesFiles as $name) {
+            $fullPath = $templatePath . '/' . $name;
+            if (!is_file($fullPath)) {
+                continue;
+            }
+            $zip->addFromString($name, file_get_contents($fullPath));
         }
         // If API key provided, add ready-to-use config.php (reseller sets API_BASE_URL, BUSINESS_NAME, LOGO_URL)
         if ($apiKey !== '') {

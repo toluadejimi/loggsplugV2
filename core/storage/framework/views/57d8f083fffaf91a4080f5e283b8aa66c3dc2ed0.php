@@ -491,14 +491,13 @@
     color: #0F0673 !important;
 }
 
-/* Flash buy toast - full width, frosted glass, more text visible */
+/* Flash buy toast - edge-to-edge, frosted glass, more text visible */
 .products-flash-buy {
     position: fixed;
     bottom: 72px;
-    left: 10px;
-    right: 10px;
-    width: calc(100vw - 20px);
-    max-width: 100%;
+    left: 0;
+    right: 0;
+    width: 100%;
     z-index: 9998;
     background: rgba(15, 6, 115, 0.75);
     backdrop-filter: blur(12px);
