@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Deposit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ApiController extends Controller
 {
@@ -14,15 +15,23 @@ class ApiController extends Controller
      */
     public function e_check(Request $request)
     {
+        Log::channel('single')->info('Webhook incoming: e-check', [
+            'payload' => $request->all(),
+            'ip'      => $request->ip(),
+            'method'  => $request->method(),
+        ]);
+
         $get_user = User::where('email', $request->email)->first();
 
         if ($get_user === null) {
+            Log::channel('single')->info('Webhook e-check result: user not found', ['email' => $request->email]);
             return response()->json([
                 'status'  => false,
                 'message' => 'No user found, please check email and try again',
             ]);
         }
 
+        Log::channel('single')->info('Webhook e-check result: success', ['user_id' => $get_user->id, 'username' => $get_user->username]);
         return response()->json([
             'status' => true,
             'user'  => $get_user->username,
@@ -36,9 +45,16 @@ class ApiController extends Controller
      */
     public function e_fund(Request $request)
     {
+        Log::channel('single')->info('Webhook incoming: e-fund', [
+            'payload' => $request->all(),
+            'ip'      => $request->ip(),
+            'method'  => $request->method(),
+        ]);
+
         $get_user = User::where('email', $request->email)->first();
 
         if ($get_user === null) {
+            Log::channel('single')->info('Webhook e-fund result: user not found', ['email' => $request->email]);
             return response()->json([
                 'status'  => false,
                 'message' => 'No user found, please check email and try again',
@@ -47,6 +63,7 @@ class ApiController extends Controller
 
         $amount = (float) $request->amount;
         if ($amount <= 0) {
+            Log::channel('single')->info('Webhook e-fund result: invalid amount', ['amount' => $request->amount]);
             return response()->json([
                 'status'  => false,
                 'message' => 'Invalid amount',
@@ -69,6 +86,11 @@ class ApiController extends Controller
         }
 
         $amountFormatted = number_format($amount, 2);
+        Log::channel('single')->info('Webhook e-fund result: success', [
+            'user_id' => $get_user->id,
+            'order_id' => $request->order_id,
+            'amount' => $amount,
+        ]);
 
         return response()->json([
             'status'  => true,
@@ -82,6 +104,12 @@ class ApiController extends Controller
      */
     public function verify_username(Request $request)
     {
+        Log::channel('single')->info('Webhook incoming: verify-username', [
+            'payload' => $request->only('email'),
+            'ip'      => $request->ip(),
+            'method'  => $request->method(),
+        ]);
+
         $get_user = User::where('email', $request->email)->first();
 
         if ($get_user === null) {
