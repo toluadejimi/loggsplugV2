@@ -63,7 +63,7 @@
             <div class="row align-items-center g-3">
                 <div class="col-lg-8 col-12">
                     <h2 class="products-greeting mb-0">
-                        Hi{{ Auth::user()->username ? ', ' . Auth::user()->username : '' }} 👋
+                        Hi{{ Auth::check() && Auth::user()->username ? ', ' . Auth::user()->username : '' }} 👋
                     </h2>
                     <p class="products-subtext text-muted mb-0 mt-1 small">Browse categories or explore products below.</p>
                 </div>
