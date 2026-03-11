@@ -23,18 +23,25 @@ class ResellerApiController extends Controller
      */
     public function productImage(int $id): BinaryFileResponse|JsonResponse
     {
-        $product = Product::active()->find($id);
+        $product = Product::find($id);
         if (!$product || empty($product->image)) {
             return response()->json(['message' => 'Not found'], 404);
         }
-        $path = public_path('assets/images/product/' . $product->image);
+        $filename = basename(trim($product->image));
+        if ($filename === '' || preg_match('/[\/\\\\]/', $filename)) {
+            return response()->json(['message' => 'Invalid image'], 404);
+        }
+        $directory = public_path(getFilePath('product'));
+        $path = $directory . DIRECTORY_SEPARATOR . $filename;
         if (!is_file($path) || !is_readable($path)) {
             return response()->json(['message' => 'Image not found'], 404);
         }
-        $mime = match (strtolower(pathinfo($path, PATHINFO_EXTENSION))) {
+        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        $mime = match ($ext) {
             'png' => 'image/png',
             'gif' => 'image/gif',
             'webp' => 'image/webp',
+            'jpeg', 'jpg' => 'image/jpeg',
             default => 'image/jpeg',
         };
         return response()->file($path, [
@@ -62,7 +69,7 @@ class ResellerApiController extends Controller
                 $inStock = $product->unsoldProductDetails()->count();
                 $imageUrl = null;
                 if (!empty($product->image)) {
-                    $imageUrl = url('/api/reseller/product-image/' . $product->id);
+                    $imageUrl = asset('assets/images/product/' . $product->image);
                 }
                 return [
                     'id' => $product->id,
