@@ -50,9 +50,12 @@ if ($apiKey && $baseUrl) {
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_HTTPHEADER => ['X-Api-Key: ' . $apiKey],
+        CURLOPT_TIMEOUT => 15,
+        CURLOPT_FOLLOWLOCATION => true,
     ]);
     $res = curl_exec($ch);
-    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curlError = curl_error($ch);
     curl_close($ch);
     if ($code === 200 && $res) {
         $data = json_decode($res, true);
@@ -62,7 +65,12 @@ if ($apiKey && $baseUrl) {
             $error = $data['message'] ?? 'Failed to load products.';
         }
     } else {
-        $error = 'Invalid API key or connection error. Check config.php.';
+        if ($res) {
+            $data = json_decode($res, true);
+            $error = isset($data['message']) ? $data['message'] : ('HTTP ' . $code . '. Check API key and reseller status on the platform.');
+        } else {
+            $error = $curlError ? 'Connection error: ' . $curlError : 'Could not reach ' . $baseUrl . '. Check API_BASE_URL and server connectivity.';
+        }
     }
 }
 

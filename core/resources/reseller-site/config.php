@@ -3,12 +3,10 @@
  * Reseller Mini-Site Config
  * Copy this file to config.php and fill in your details.
  */
-
-// Your API key (from the platform admin or your reseller dashboard)
-define('RESELLER_API_KEY', 'rsl_9LMpUisC9wMaBNLakhI1FfhKVDbBMf9w6hPZN6N9R8XQPzpQ');
+define('RESELLER_API_KEY', 'rsl_5ja4YOV8npFywScJGW486dmCPVIIaF3ES9Id7uO3VopexO1e');
 
 // Platform API base URL (no trailing slash). Example: https://loggsplug.online
-define('API_BASE_URL', 'http://localhost:9090');
+define('API_BASE_URL', 'https://loggsplug.online');
 
 // Your selling margin in percent (added on top of your cost). Example: 15 = 15% markup
 define('MARKUP_PERCENT', 10);
