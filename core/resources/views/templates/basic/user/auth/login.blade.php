@@ -22,9 +22,6 @@
     <!-- Main css -->
     <link rel="stylesheet" href="{{ url('') }}/assets/assets2/css/main.css">
 
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-
-
 </head>
 <body>
 
@@ -222,27 +219,6 @@
                     <div class="col-12">
                         <button type="submit" class="btn btn-main btn-lg w-100 pill"> Sign In</button>
                     </div>
-
-
-
-                    <div id="g_id_onload"
-                         data-client_id="1050407863306-8j292r68v5mn4ea9qjuqo89iv4j7i4h8.apps.googleusercontent.com"
-                         data-context="signin"
-                         data-ux_mode="popup"
-                         data-login_uri="{{url('')}}/auth/google/callback"
-                         data-auto_prompt="false">
-                    </div>
-
-                    <div class="g_id_signin"
-                         data-type="standard"
-                         data-shape="rectangular"
-                         data-theme="outline"
-                         data-text="sign_in_with"
-                         data-size="large"
-                         data-logo_alignment="left">
-                    </div>
-
-
 
                     <div class="col-sm-12 mb-0">
                         <div class="have-account">

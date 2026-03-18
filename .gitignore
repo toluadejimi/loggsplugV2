@@ -1,3 +1,6 @@
 /core/.env
 /core/storage/logs
+/core/storage/framework/cache/
+/core/storage/framework/sessions/
+/core/storage/framework/views/
 /core/resources/reseller-site/uploads/

@@ -196,23 +196,32 @@ class SiteController extends Controller
     }
 
     public function products(){
-
-
-
         $request = request();
 
         $request->validate([
-            'search' => 'nullable|regex:/^[\w-]*$/'
+            'search' => 'nullable|string|max:100'
         ]);
 
+        $search = $request->filled('search') ? trim($request->search) : null;
+
         $query = Category::where('status', 1)->with([
-            'products' => function ($products) {
-                return $products->active()->orderBy('id', 'DESC');
+            'products' => function ($products) use ($search) {
+                $q = $products->active()->orderBy('id', 'DESC');
+                if ($search !== null) {
+                    $q->where('name', 'LIKE', '%' . $search . '%');
+                }
+                return $q;
             },
             'products.productDetails'
         ]);
 
-        $categories = $query->orderBy('name')->paginate(10);
+        if ($search !== null) {
+            $query->whereHas('products', function ($q) use ($search) {
+                $q->active()->where('name', 'LIKE', '%' . $search . '%');
+            });
+        }
+
+        $categories = $query->orderBy('name')->paginate(10)->appends($request->only('search'));
         $categoriesdrop = Category::where('status', 1)->orderBy('name')->get();
 
         if ($request->ajax()) {
@@ -225,15 +234,6 @@ class SiteController extends Controller
                 ])->render(),
                 'next_page' => $categories->nextPageUrl(),
             ]);
-        }
-
-
-        if ($request->ajax()) {
-            return response()->json([
-                'html' => view($activeTemplate . 'partials.category_loop', compact('categories'))->render(),
-                'next_page' => $categories->nextPageUrl(),
-            ]);
-
         }
         $pageTitle = 'Products';
 
@@ -277,7 +277,8 @@ class SiteController extends Controller
             'categories',
             'sections',
             'wallet',
-            'productSliders'
+            'productSliders',
+            'search'
         ));
     }
 

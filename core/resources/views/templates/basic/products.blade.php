@@ -58,24 +58,36 @@
     <!-- Recent -->
     <div class="dashboard-body__content">
 
-        <!-- welcome + category filter -->
+        <!-- welcome + search + category filter -->
         <div class="products-page-header mt-2 mb-4">
             <div class="row align-items-center g-3">
-                <div class="col-lg-8 col-12">
+                <div class="col-lg-6 col-12">
                     <h2 class="products-greeting mb-0">
                         Hi{{ Auth::check() && Auth::user()->username ? ', ' . Auth::user()->username : '' }} 👋
                     </h2>
                     <p class="products-subtext text-muted mb-0 mt-1 small">Browse categories or explore products below.</p>
                 </div>
-                <div class="col-lg-4 col-12 d-flex justify-content-lg-end">
-                    <div class="products-category-select-wrap">
-                        <select id="urlSelect" onchange="redirectToUrl()" class="products-category-select">
-                            <option value="">All categories</option>
-                            @foreach($categoriesdrop as $data)
-                                <option value="{{ url('') }}/category-products/{{ $data->name }}/{{ $data->id }}">{{ $data->name }}</option>
-                            @endforeach
-                        </select>
-                        <i class="las la-chevron-down products-category-select-icon"></i>
+                <div class="col-lg-6 col-12">
+                    <div class="d-flex flex-wrap align-items-center gap-2 justify-content-lg-end">
+                        <form action="{{ route('products') }}" method="get" class="products-search-form flex-grow-1 flex-lg-grow-0">
+                            <div class="products-search-bar">
+                                <i class="las la-search products-search-icon"></i>
+                                <input type="text" name="search" class="products-search-input" placeholder="Search products…" value="{{ old('search', $search ?? '') }}" maxlength="100" autocomplete="off">
+                                @if(!empty($search))
+                                    <a href="{{ route('products') }}" class="products-search-clear" title="Clear search"><i class="las la-times"></i></a>
+                                @endif
+                            </div>
+                            <button type="submit" class="products-search-btn">Search</button>
+                        </form>
+                        <div class="products-category-select-wrap">
+                            <select id="urlSelect" onchange="redirectToUrl()" class="products-category-select">
+                                <option value="">All categories</option>
+                                @foreach($categoriesdrop as $data)
+                                    <option value="{{ url('') }}/category-products/{{ $data->name }}/{{ $data->id }}">{{ $data->name }}</option>
+                                @endforeach
+                            </select>
+                            <i class="las la-chevron-down products-category-select-icon"></i>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -93,8 +105,29 @@
 
             <div class="products-content">
 
+                <div class="products-explore-head mb-3">
+                    <h5 class="mb-0 fw-600">Explore products</h5>
+                    <p class="text-muted small mb-0 mt-1">Choose a category to see more.</p>
+                </div>
+
+
+
+
+
+                <div class="col-12">
+                    <div id="category-wrapper">
+                        @include($activeTemplate . 'partials.category_loop')
+                    </div>
+
+                </div>
+
+                <div class="text-center py-4" id="loading" style="display: none;">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="text-muted small mt-2 mb-0">Loading more products…</p>
+                </div>
+
                 @auth
-                <div class="col-12 mb-4">
+                <div class="col-12 mb-4 mt-4 pt-4 border-top">
                     <div class="products-recent-card card border-0 shadow-sm overflow-hidden">
                         <div class="card-header products-recent-header border-0 py-3">
                             <h6 class="mb-0 d-flex align-items-center gap-2">
@@ -137,27 +170,6 @@
                     </div>
                 </div>
                 @endauth
-
-                <div class="products-explore-head mb-3">
-                    <h5 class="mb-0 fw-600">Explore products</h5>
-                    <p class="text-muted small mb-0 mt-1">Choose a category to see more.</p>
-                </div>
-
-
-
-
-
-                <div class="col-12">
-                    <div id="category-wrapper">
-                        @include($activeTemplate . 'partials.category_loop')
-                    </div>
-
-                </div>
-
-                <div class="text-center py-4" id="loading" style="display: none;">
-                    <div class="spinner-border text-primary" role="status"></div>
-                    <p class="text-muted small mt-2 mb-0">Loading more products…</p>
-                </div>
 
             </div>
 
@@ -357,6 +369,82 @@
     pointer-events: none;
     color: #64748b;
     font-size: 1rem;
+}
+
+/* Modern search bar */
+.products-search-form {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    max-width: 380px;
+    width: 100%;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(99, 102, 241, 0.08), 0 1px 3px rgba(0,0,0,0.06);
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    transition: box-shadow .2s ease, border-color .2s ease;
+}
+.products-search-form:focus-within {
+    border-color: #6366f1;
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.18), 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+.products-search-bar {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    position: relative;
+    padding: 0 1rem 0 2.75rem;
+    min-height: 44px;
+}
+.products-search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 1.1rem;
+    pointer-events: none;
+}
+.products-search-form:focus-within .products-search-icon { color: #6366f1; }
+.products-search-input {
+    width: 100%;
+    border: none;
+    background: transparent;
+    font-size: 0.9rem;
+    color: #1e293b;
+    padding: 0.25rem 0;
+}
+.products-search-input::placeholder { color: #94a3b8; }
+.products-search-input:focus { outline: none; }
+.products-search-clear {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    color: #64748b;
+    margin-left: 0.25rem;
+    transition: color .15s, background .15s;
+}
+.products-search-clear:hover {
+    color: #6366f1;
+    background: rgba(99, 102, 241, 0.1);
+}
+.products-search-btn {
+    padding: 0 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #fff;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    border: none;
+    cursor: pointer;
+    transition: opacity .2s, transform .15s;
+}
+.products-search-btn:hover {
+    opacity: 0.95;
+    transform: translateY(-1px);
 }
 
 /* Recent orders card */
