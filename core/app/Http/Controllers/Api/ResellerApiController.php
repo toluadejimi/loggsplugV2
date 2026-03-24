@@ -97,7 +97,7 @@ class ResellerApiController extends Controller
     {
         $request->validate([
             'product_id' => 'required|integer',
-            'qty' => 'required|integer|min:1|max:100',
+            'qty' => 'required|integer|min:1|max:10000',
         ]);
 
         $reseller = $request->attributes->get('reseller');

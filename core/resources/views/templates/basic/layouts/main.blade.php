@@ -937,7 +937,7 @@
                     var qtyInput = buyForm.querySelector('input[name="qty"]');
                     if (qtyInput) {
                         var qty = parseInt(qtyInput.value, 10) || 1;
-                        qty = Math.max(1, Math.min(100, qty));
+                        qty = Math.max(1, Math.min(10000, qty));
                         qtyInput.value = qty;
                     }
                     buyBtn.disabled = true;

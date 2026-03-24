@@ -17,7 +17,7 @@
                     <div class="card-body">
                         <h6 class="fw-bold text-muted mb-1">@lang('Product')</h6>
                         <p class="mb-0">{{ optional(optional($order->orderItems->first())->product)->name ?? optional(\App\Models\Product::find($order->product_id))->name ?? 'N/A' }}</p>
-                        <p class="mb-0 mt-1"><span class="fw-bold text-muted">@lang('Quantity'):</span> {{ $order->orderItems->count() - 1 }}</p>
+                        <p class="mb-0 mt-1"><span class="fw-bold text-muted">@lang('Quantity'):</span> {{ $order->orderItems->count() }}</p>
                     </div>
                 </div>
             </div>

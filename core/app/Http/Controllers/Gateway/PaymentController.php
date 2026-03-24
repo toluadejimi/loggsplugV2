@@ -50,7 +50,7 @@ class PaymentController extends Controller
             if (is_array($qtyRaw)) {
                 $qtyRaw = $qtyRaw[0] ?? 1;
             }
-            $qty = max(1, min(100, (int) $qtyRaw));
+            $qty = max(1, min(10000, (int) $qtyRaw));
 
             $product = Product::active()->whereHas('category', function ($category) {
                 return $category->active();

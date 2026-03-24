@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProxyController;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/reseller-site/download', \App\Http\Controllers\ResellerSiteDownloadController::class)->name('reseller-site.download');
@@ -62,3 +63,29 @@ Route::controller('SiteController')->group(function () {
     Route::get('/{slug}', 'pages')->name('pages');
     Route::get('/', 'index')->name('home')->middleware('log.requests');
 });
+
+/*
+|--------------------------------------------------------------------------
+| SPA (React) – serve built app from public/app. Build: cd frontend && npm run build && cp -r dist/* ../core/public/app/
+|--------------------------------------------------------------------------
+*/
+Route::get('/app', function () {
+    $path = public_path('app/index.html');
+    if (!File::exists($path)) {
+        abort(404, 'SPA not built. Run: cd frontend && npm run build && cp -r dist/* ../core/public/app/');
+    }
+    return response()->file($path, ['Content-Type' => 'text/html']);
+});
+Route::get('/app/{path}', function ($path) {
+    if (str_starts_with($path, 'assets/')) {
+        $file = public_path("app/{$path}");
+        if (File::exists($file)) {
+            return response()->file($file);
+        }
+    }
+    $index = public_path('app/index.html');
+    if (File::exists($index)) {
+        return response()->file($index, ['Content-Type' => 'text/html']);
+    }
+    abort(404);
+})->where('path', '.*');

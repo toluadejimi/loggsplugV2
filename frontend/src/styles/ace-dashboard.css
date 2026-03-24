@@ -1,0 +1,35 @@
+/* Ace-style dashboard tokens (ported from root src/styles/dashboard.css) */
+:root {
+  --db-navy: 220 25% 8%;
+  --db-navy-light: 220 20% 12%;
+  --db-green: 105 100% 42%;
+  --db-green-dim: 105 100% 42% / 0.12;
+  --db-green-border: 105 100% 42% / 0.35;
+  --db-bg: 220 22% 96%;
+  --db-card: 0 0% 100%;
+  --db-border: 220 15% 88%;
+  --db-text: 220 25% 12%;
+  --db-text-muted: 220 15% 45%;
+  --db-radius: 14px;
+}
+
+[data-theme="dark"] {
+  --db-bg: 220 22% 10%;
+  --db-card: 220 25% 14%;
+  --db-border: 220 20% 22%;
+  --db-text: 220 15% 95%;
+  --db-text-muted: 220 10% 65%;
+}
+
+/* Optional helpers (use via Tailwind arbitrary values) */
+.db-page {
+  background: hsl(var(--db-bg));
+  color: hsl(var(--db-text));
+}
+
+.db-card {
+  background: hsl(var(--db-card));
+  border: 1px solid hsl(var(--db-border));
+  border-radius: var(--db-radius);
+}
+

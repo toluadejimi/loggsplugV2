@@ -80,7 +80,7 @@
                                            class="form-control product-detail-qty"
                                            value="1"
                                            min="1"
-                                           max="{{ min($product->in_stock, 100) }}"
+                                           max="{{ min($product->in_stock, 10000) }}"
                                            aria-label="Quantity">
                                 </div>
                                 <div class="col">

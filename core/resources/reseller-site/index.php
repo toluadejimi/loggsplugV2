@@ -88,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['product_id'])) {
     }
     $productId = (int) $_POST['product_id'];
     $qty = isset($_POST['qty']) ? (int) $_POST['qty'] : 1;
-    $qty = max(1, min(100, $qty));
+    $qty = max(1, min(10000, $qty));
 
     // Find product and calculate total cost (user pays this from wallet when logged in)
     $sellPrice = 0;

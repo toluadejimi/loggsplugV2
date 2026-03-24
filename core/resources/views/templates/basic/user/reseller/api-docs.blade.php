@@ -82,7 +82,7 @@
                     <p class="small text-muted mb-1">Body (JSON or form):</p>
                     <ul class="mb-2">
                         <li><code>product_id</code> (required) — Product ID</li>
-                        <li><code>qty</code> (required) — Quantity (1–100)</li>
+                        <li><code>qty</code> (required) — Quantity (1–10,000)</li>
                     </ul>
                     <p class="small text-muted mb-2">Example response:</p>
                     <pre class="bg-light p-3 rounded small mb-0" style="overflow-x:auto;">{

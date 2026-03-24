@@ -114,7 +114,7 @@
                     <div class="modal-body">
                         <p class="text-muted small mb-3" id="buyAgainProductLabel">Enter quantity for this product.</p>
                         <label for="buyAgainQty" class="form-label">Quantity</label>
-                        <input type="number" name="qty" id="buyAgainQty" class="form-control" value="1" min="1" max="100" required>
+                        <input type="number" name="qty" id="buyAgainQty" class="form-control" value="1" min="1" max="10000" required>
                     </div>
                     <div class="modal-footer border-0">
                         <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>

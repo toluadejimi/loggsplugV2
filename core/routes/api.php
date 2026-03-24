@@ -3,6 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApiController;
+use App\Http\Controllers\Api\AppApiController;
+use App\Http\Controllers\Api\AuthApiController;
 use App\Http\Controllers\Api\ResellerApiController;
 
 /*
@@ -18,8 +20,34 @@ Route::any('verify-username', [ApiController::class, 'verify_username'])->name('
 
 /*
 |--------------------------------------------------------------------------
-| Reseller API – public image URL (no auth) so reseller sites can show product images
-| without hitting 403 from hotlink protection on /assets/...
+| App API (React frontend) – public endpoints
+|--------------------------------------------------------------------------
+*/
+Route::get('categories', [AppApiController::class, 'categories']);
+Route::get('products', [AppApiController::class, 'products']);
+Route::get('products/{id}', [AppApiController::class, 'productDetails'])->where('id', '[0-9]+');
+Route::get('gateway-currencies', [AppApiController::class, 'gatewayCurrencies']);
+
+Route::post('login', [AuthApiController::class, 'login']);
+Route::post('register', [AuthApiController::class, 'register']);
+
+/*
+|--------------------------------------------------------------------------
+| App API (React frontend) – auth required
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('logout', [AuthApiController::class, 'logout']);
+    Route::get('user', [AppApiController::class, 'user']);
+    Route::get('dashboard', [AppApiController::class, 'dashboard']);
+    Route::get('orders', [AppApiController::class, 'orders']);
+    Route::get('orders/{id}', [AppApiController::class, 'orderDetails'])->where('id', '[0-9]+');
+    Route::get('category-products/{id}', [AppApiController::class, 'categoryProducts'])->where('id', '[0-9]+');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Reseller API – public image URL (no auth)
 |--------------------------------------------------------------------------
 */
 Route::get('reseller/product-image/{id}', [ResellerApiController::class, 'productImage'])->name('api.reseller.product-image');
