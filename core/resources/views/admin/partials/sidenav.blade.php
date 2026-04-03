@@ -484,6 +484,12 @@
                                     <span class="menu-title">@lang('Cache')</span>
                                 </a>
                             </li>
+                            <li class="sidebar-menu-item {{menuActive('admin.system.database.backup')}} ">
+                                <a href="{{route('admin.system.database.backup')}}" class="nav-link">
+                                    <i class="menu-icon las la-database"></i>
+                                    <span class="menu-title">@lang('Database backup')</span>
+                                </a>
+                            </li>
                             <li class="sidebar-menu-item {{menuActive('admin.system.update')}} ">
                                 <a href="{{route('admin.system.update')}}" class="nav-link">
                                     <i class="menu-icon las la-dot-circle"></i>
