@@ -8,11 +8,13 @@ use App\Lib\CurlRequest;
 use App\Lib\FileManager;
 use App\Models\UpdateLog;
 use App\Rules\FileTypeValidate;
+use App\Jobs\CreateAdminDatabaseBackupJob;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Laramin\Utility\VugiChugi;
-use PDO;
 
 class SystemController extends Controller
 {
@@ -41,310 +43,97 @@ class SystemController extends Controller
         return view('admin.system.server',compact('pageTitle', 'currentPHP', 'serverDetails'));
     }
 
-    /**
-     * Download a SQL (or SQLite file) backup of the default database. Admin only.
-     */
-    public function downloadDatabaseBackup()
+    public function databaseBackupPage()
     {
-        $connection = config('database.default');
-        $config = config("database.connections.{$connection}");
+        $pageTitle = 'Database backup';
+        $files = $this->listPreparedDatabaseBackups();
+        $status = Cache::get('admin_db_backup_status');
+        $queueDriver = config('queue.default');
 
-        if (! is_array($config) || empty($config['driver'])) {
-            $notify[] = ['error', 'Database connection is not configured.'];
+        return view('admin.system.database_backup', compact('pageTitle', 'files', 'status', 'queueDriver'));
+    }
+
+    public function queueDatabaseBackup()
+    {
+        $current = Cache::get('admin_db_backup_status');
+        if (is_array($current) && ($current['state'] ?? '') === 'running') {
+            $notify[] = ['warning', 'A backup is already running. Wait until it finishes, then refresh.'];
+
             return back()->withNotify($notify);
         }
 
-        $driver = $config['driver'];
-        $stamp = date('Y-m-d_His');
-        $baseName = 'db_backup_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $connection) . '_' . $stamp;
-
-        try {
-            if ($driver === 'mysql') {
-                return $this->downloadMysqlBackup($config, $baseName . '.sql');
-            }
-            if ($driver === 'sqlite') {
-                return $this->downloadSqliteBackup($config, $baseName . '.sqlite');
-            }
-            if ($driver === 'pgsql') {
-                return $this->downloadPgsqlBackup($config, $baseName . '.sql');
-            }
-        } catch (\Throwable $e) {
-            $notify[] = ['error', 'Backup failed: ' . $e->getMessage()];
-            return back()->withNotify($notify);
+        $queue = config('queue.default');
+        if (in_array($queue, ['database', 'redis', 'beanstalkd', 'sqs'], true)) {
+            CreateAdminDatabaseBackupJob::dispatch();
+            Cache::put('admin_db_backup_status', [
+                'state' => 'queued',
+                'message' => 'Waiting for queue worker. Run: php artisan queue:work --timeout=7200',
+                'file' => null,
+                'queued_at' => time(),
+            ], 7200);
+            $notify[] = ['success', 'Backup queued. A background worker must be running to process it (see instructions on this page). Refresh periodically until a file appears below.'];
+        } else {
+            Bus::dispatchAfterResponse(new CreateAdminDatabaseBackupJob());
+            Cache::put('admin_db_backup_status', [
+                'state' => 'queued',
+                'message' => 'Will start after this response is sent (same server process).',
+                'file' => null,
+                'queued_at' => time(),
+            ], 7200);
+            $notify[] = ['success', 'Backup started in the background. This page should load quickly—wait and refresh until the new file appears. For very large databases, switch to QUEUE_CONNECTION=database and run a dedicated queue worker.'];
         }
 
-        $notify[] = ['error', 'Backup is not implemented for driver: ' . $driver];
         return back()->withNotify($notify);
     }
 
-    protected function downloadMysqlBackup(array $config, string $downloadName)
+    public function databaseBackupStatus()
     {
-        $defaultsFile = $this->mysqlClientDefaultsFile($config);
-        if ($defaultsFile === null) {
-            $notify[] = ['error', 'Could not create temporary credentials file for backup.'];
-            return back()->withNotify($notify);
+        return response()->json([
+            'status' => Cache::get('admin_db_backup_status'),
+            'files' => $this->listPreparedDatabaseBackups(),
+        ]);
+    }
+
+    public function downloadPreparedDatabaseBackup(string $file)
+    {
+        $base = basename($file);
+        if (! preg_match('/^db_backup_[A-Za-z0-9_.-]+\.(sql|sqlite)$/', $base)) {
+            abort(404);
         }
 
-        $tmpSql = tempnam(sys_get_temp_dir(), 'dbdump_');
-        if ($tmpSql === false) {
-            @unlink($defaultsFile);
-            $notify[] = ['error', 'Could not create temporary file for backup.'];
-            return back()->withNotify($notify);
+        $path = storage_path('app/backups/database/' . $base);
+        if (! is_file($path)) {
+            abort(404);
         }
 
-        try {
-            $ok = $this->runMysqldumpToFile($config, $defaultsFile, $tmpSql);
-            if (! $ok) {
-                @unlink($tmpSql);
-                $tmpSql = tempnam(sys_get_temp_dir(), 'dbdump_');
-                if ($tmpSql === false) {
-                    $notify[] = ['error', 'mysqldump failed and PHP fallback could not create a temp file.'];
-                    return back()->withNotify($notify);
-                }
-                $this->dumpMysqlTablesWithPhp($tmpSql);
-            }
-        } catch (\Throwable $e) {
-            @unlink($tmpSql);
-            @unlink($defaultsFile);
-            throw $e;
-        } finally {
-            @unlink($defaultsFile);
-        }
-
-        return response()->download($tmpSql, $downloadName)->deleteFileAfterSend(true);
+        return response()->download($path, $base);
     }
 
     /**
-     * @return string|null Absolute path to a temporary my.cnf-style file (0600), or null on failure
+     * @return array<int, array{name: string, size: int, mtime: int}>
      */
-    protected function mysqlClientDefaultsFile(array $config): ?string
+    protected function listPreparedDatabaseBackups(): array
     {
-        $path = tempnam(sys_get_temp_dir(), 'my_cnf_');
-        if ($path === false) {
-            return null;
+        $dir = storage_path('app/backups/database');
+        if (! is_dir($dir)) {
+            return [];
         }
 
-        $password = (string) ($config['password'] ?? '');
-        $escaped = str_replace(['\\', '"', "\n", "\r"], ['\\\\', '\\"', '\\n', '\\r'], $password);
-        $lines = ["[client]"];
-
-        if (! empty($config['unix_socket'])) {
-            $lines[] = 'socket=' . $config['unix_socket'];
-        } else {
-            $lines[] = 'host=' . ($config['host'] ?? '127.0.0.1');
-            $lines[] = 'port=' . (int) ($config['port'] ?? 3306);
-        }
-
-        $lines[] = 'user=' . ($config['username'] ?? 'root');
-        $lines[] = 'password="' . $escaped . '"';
-
-        if (file_put_contents($path, implode("\n", $lines) . "\n") === false) {
-            @unlink($path);
-            return null;
-        }
-        chmod($path, 0600);
-
-        return $path;
-    }
-
-    protected function runMysqldumpToFile(array $config, string $defaultsFile, string $outputPath): bool
-    {
-        $database = $config['database'] ?? '';
-        if (! is_string($database) || $database === '') {
-            return false;
-        }
-
-        $cmd = [
-            'mysqldump',
-            '--defaults-extra-file=' . $defaultsFile,
-            '--single-transaction',
-            '--skip-lock-tables',
-            '--routines',
-            '--no-tablespaces',
-            $database,
-        ];
-
-        $descriptorspec = [
-            0 => ['pipe', 'r'],
-            1 => ['file', $outputPath, 'wb'],
-            2 => ['pipe', 'w'],
-        ];
-
-        $process = proc_open($cmd, $descriptorspec, $pipes, null, null, ['bypass_shell' => true]);
-        if (! is_resource($process)) {
-            return false;
-        }
-
-        if (isset($pipes[0]) && is_resource($pipes[0])) {
-            fclose($pipes[0]);
-        }
-        $stderr = isset($pipes[2]) && is_resource($pipes[2]) ? stream_get_contents($pipes[2]) : '';
-        if (isset($pipes[2]) && is_resource($pipes[2])) {
-            fclose($pipes[2]);
-        }
-
-        $code = proc_close($process);
-        if ($code !== 0) {
-            @unlink($outputPath);
-            return false;
-        }
-
-        if (! is_file($outputPath) || filesize($outputPath) === 0) {
-            @unlink($outputPath);
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Slower fallback when mysqldump is unavailable; streams rows via PDO.
-     */
-    protected function dumpMysqlTablesWithPhp(string $outputPath): void
-    {
-        $pdo = DB::connection()->getPdo();
-        $database = DB::connection()->getDatabaseName();
-
-        $fp = fopen($outputPath, 'wb');
-        if ($fp === false) {
-            throw new \RuntimeException('Cannot open output file for backup.');
-        }
-
-        fwrite($fp, "-- PHP-generated MySQL backup " . date('c') . "\n");
-        fwrite($fp, "SET NAMES utf8mb4;\nSET FOREIGN_KEY_CHECKS=0;\n\n");
-
-        $dbQuoted = str_replace('`', '``', $database);
-        $stmt = $pdo->query('SHOW TABLES FROM `' . $dbQuoted . '`');
-        $tables = $stmt ? $stmt->fetchAll(PDO::FETCH_COLUMN) : [];
-
-        foreach ($tables as $table) {
-            if (! is_string($table) || ! preg_match('/^[a-zA-Z0-9_]+$/', $table)) {
+        $out = [];
+        foreach (glob($dir . DIRECTORY_SEPARATOR . 'db_backup_*') ?: [] as $full) {
+            if (! is_file($full)) {
                 continue;
             }
-
-            $t = str_replace('`', '``', $table);
-            $createRow = $pdo->query('SHOW CREATE TABLE `' . $t . '`')->fetch(PDO::FETCH_ASSOC);
-            if (! $createRow || empty($createRow['Create Table'])) {
-                continue;
-            }
-
-            fwrite($fp, "DROP TABLE IF EXISTS `" . $t . "`;\n");
-            fwrite($fp, $createRow['Create Table'] . ";\n\n");
-
-            $select = $pdo->query('SELECT * FROM `' . $t . '`');
-            if (! $select) {
-                continue;
-            }
-
-            while ($row = $select->fetch(PDO::FETCH_ASSOC)) {
-                $cols = array_keys($row);
-                $colList = implode('`,`', array_map(static fn ($c) => str_replace('`', '``', $c), $cols));
-                $vals = [];
-                foreach ($row as $v) {
-                    if ($v === null) {
-                        $vals[] = 'NULL';
-                    } else {
-                        $vals[] = $pdo->quote((string) $v);
-                    }
-                }
-                $valList = implode(',', $vals);
-                fwrite($fp, 'INSERT INTO `' . $t . '` (`' . $colList . '`) VALUES (' . $valList . ");\n");
-            }
-            fwrite($fp, "\n");
+            $out[] = [
+                'name' => basename($full),
+                'size' => (int) filesize($full),
+                'mtime' => (int) filemtime($full),
+            ];
         }
 
-        fwrite($fp, "SET FOREIGN_KEY_CHECKS=1;\n");
-        fclose($fp);
-    }
+        usort($out, static fn ($a, $b) => $b['mtime'] <=> $a['mtime']);
 
-    protected function downloadSqliteBackup(array $config, string $downloadName)
-    {
-        $path = $config['database'] ?? '';
-        if ($path === ':memory:') {
-            $notify[] = ['error', 'In-memory SQLite cannot be downloaded.'];
-            return back()->withNotify($notify);
-        }
-
-        if ($path === '' || ! is_file($path)) {
-            $alt = database_path(basename((string) $path));
-            if (is_file($alt)) {
-                $path = $alt;
-            }
-        }
-
-        if (! is_file($path) || ! is_readable($path)) {
-            $notify[] = ['error', 'SQLite database file was not found or is not readable.'];
-            return back()->withNotify($notify);
-        }
-
-        return response()->download($path, $downloadName);
-    }
-
-    protected function downloadPgsqlBackup(array $config, string $downloadName)
-    {
-        $database = $config['database'] ?? '';
-        $host = $config['host'] ?? '127.0.0.1';
-        $port = (string) ($config['port'] ?? 5432);
-        $user = $config['username'] ?? 'postgres';
-
-        if ($database === '') {
-            $notify[] = ['error', 'PostgreSQL database name is missing.'];
-            return back()->withNotify($notify);
-        }
-
-        $tmpSql = tempnam(sys_get_temp_dir(), 'pgdump_');
-        if ($tmpSql === false) {
-            $notify[] = ['error', 'Could not create temporary file for backup.'];
-            return back()->withNotify($notify);
-        }
-
-        $env = [];
-        foreach ($_SERVER as $k => $v) {
-            if (is_string($k) && is_string($v)) {
-                $env[$k] = $v;
-            }
-        }
-        $env['PGPASSWORD'] = (string) ($config['password'] ?? '');
-
-        $cmd = [
-            'pg_dump',
-            '-h', $host,
-            '-p', $port,
-            '-U', $user,
-            '-d', $database,
-            '--no-owner',
-            '-F', 'p',
-        ];
-
-        $descriptorspec = [
-            0 => ['pipe', 'r'],
-            1 => ['file', $tmpSql, 'wb'],
-            2 => ['pipe', 'w'],
-        ];
-
-        $process = proc_open($cmd, $descriptorspec, $pipes, null, $env, ['bypass_shell' => true]);
-        if (! is_resource($process)) {
-            @unlink($tmpSql);
-            $notify[] = ['error', 'Could not run pg_dump.'];
-            return back()->withNotify($notify);
-        }
-
-        if (isset($pipes[0]) && is_resource($pipes[0])) {
-            fclose($pipes[0]);
-        }
-        $stderr = isset($pipes[2]) && is_resource($pipes[2]) ? stream_get_contents($pipes[2]) : '';
-        if (isset($pipes[2]) && is_resource($pipes[2])) {
-            fclose($pipes[2]);
-        }
-
-        $code = proc_close($process);
-        if ($code !== 0 || ! is_file($tmpSql) || filesize($tmpSql) === 0) {
-            @unlink($tmpSql);
-            $notify[] = ['error', 'pg_dump failed: ' . Str::limit(trim($stderr), 500)];
-            return back()->withNotify($notify);
-        }
-
-        return response()->download($tmpSql, $downloadName)->deleteFileAfterSend(true);
+        return $out;
     }
 
     public function systemUpdate() {

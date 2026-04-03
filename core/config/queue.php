@@ -38,7 +38,8 @@ return [
             'driver' => 'database',
             'table' => 'jobs',
             'queue' => 'default',
-            'retry_after' => 90,
+            // Must exceed longest job (e.g. admin DB backup uses up to 7200s).
+            'retry_after' => (int) env('DB_QUEUE_RETRY_AFTER', 7200),
             'after_commit' => false,
         ],
 

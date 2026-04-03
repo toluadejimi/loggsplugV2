@@ -283,7 +283,10 @@ Route::middleware('admin')->group(function () {
         Route::get('server-info','systemServerInfo')->name('server.info');
         Route::get('optimize', 'optimize')->name('optimize');
         Route::get('optimize-clear', 'optimizeClear')->name('optimize.clear');
-        Route::get('database-backup', 'downloadDatabaseBackup')->name('database.backup');
+        Route::get('database-backup', 'databaseBackupPage')->name('database.backup');
+        Route::post('database-backup', 'queueDatabaseBackup')->name('database.backup.queue');
+        Route::get('database-backup/status', 'databaseBackupStatus')->name('database.backup.status');
+        Route::get('database-backup/download/{file}', 'downloadPreparedDatabaseBackup')->where('file', '[A-Za-z0-9_.-]+')->name('database.backup.download');
         Route::get('system-update','systemUpdate')->name('update');
         Route::post('update-upload','updateUpload')->name('update.upload');
     });
