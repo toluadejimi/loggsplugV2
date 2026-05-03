@@ -7,27 +7,40 @@ use Illuminate\Support\Facades\Log;
 
 class TelegramService
 {
+    /** @var array<string, true> */
+    private static array $notifiedThisRequest = [];
+
     /**
-     * Send to primary (TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID) or secondary bot/chat.
-     * If secondary credentials are missing, falls back to primary so alerts are not lost.
+     * Send to the single configured bot (TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID).
+     * Used for explicit one-off messages (e.g. reseller flows); no deduplication.
      */
-    public static function sendMessage(string $text, string $channel = 'primary'): bool
+    public static function sendMessage(string $text): bool
     {
-        if ($channel === 'secondary') {
-            $token = trim((string) config('services.telegram.bot_token_2', ''));
-            $chatId = trim((string) config('services.telegram.chat_id_2', ''));
-            if ($token === '' || $chatId === '') {
-                return self::sendMessage($text, 'primary');
-            }
-        } else {
-            $token = trim((string) config('services.telegram.bot_token', ''));
-            $chatId = trim((string) config('services.telegram.chat_id', ''));
+        return self::sendToPrimary($text);
+    }
+
+    /**
+     * Same as sendMessage, but identical text in the same HTTP request is only sent once
+     * (so legacy send_notification + send_notification2 pairs do not double-post).
+     */
+    public static function notify(string $text): bool
+    {
+        $key = md5($text);
+        if (isset(self::$notifiedThisRequest[$key])) {
+            return true;
         }
+        self::$notifiedThisRequest[$key] = true;
+
+        return self::sendToPrimary($text);
+    }
+
+    private static function sendToPrimary(string $text): bool
+    {
+        $token = trim((string) config('services.telegram.bot_token', ''));
+        $chatId = trim((string) config('services.telegram.chat_id', ''));
 
         if ($token === '' || $chatId === '') {
-            Log::warning('Telegram skipped: set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID in .env (see php artisan telegram:test)', [
-                'channel' => $channel,
-            ]);
+            Log::warning('Telegram skipped: set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID in .env (php artisan telegram:test)', []);
 
             return false;
         }
@@ -48,7 +61,6 @@ class TelegramService
 
             if (! $response->successful()) {
                 Log::warning('Telegram API error', [
-                    'channel' => $channel,
                     'status' => $response->status(),
                     'body' => $response->body(),
                 ]);
@@ -58,10 +70,7 @@ class TelegramService
 
             return true;
         } catch (\Throwable $e) {
-            Log::warning('Telegram send exception', [
-                'channel' => $channel,
-                'error' => $e->getMessage(),
-            ]);
+            Log::warning('Telegram send exception', ['error' => $e->getMessage()]);
 
             return false;
         }

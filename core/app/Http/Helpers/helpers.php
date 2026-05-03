@@ -446,7 +446,7 @@ if (! function_exists('send_notification')) {
     function send_notification($message)
     {
         if (class_exists(\App\Services\TelegramService::class)) {
-            \App\Services\TelegramService::sendMessage((string) $message, 'primary');
+            \App\Services\TelegramService::notify((string) $message);
         }
     }
 }
@@ -454,12 +454,12 @@ if (! function_exists('send_notification')) {
 if (! function_exists('send_notification2')) {
 
     /**
-     * Secondary Telegram bot/chat (TELEGRAM_BOT_TOKEN_2 + TELEGRAM_CHAT_ID_2), or primary if unset.
+     * Legacy alias: same single Telegram as send_notification (deduped if both run with the same text).
      */
     function send_notification2($message)
     {
         if (class_exists(\App\Services\TelegramService::class)) {
-            \App\Services\TelegramService::sendMessage((string) $message, 'secondary');
+            \App\Services\TelegramService::notify((string) $message);
         }
     }
 }
