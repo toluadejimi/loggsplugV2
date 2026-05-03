@@ -19,6 +19,8 @@ use App\Models\GatewayCurrency;
 use App\Models\AdminNotification;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
@@ -26,130 +28,110 @@ class PaymentController extends Controller
     {
 
 
-        if ($request->payment == "wallet") {
-
-            $last_order = Order::latest()->where('user_id', Auth::id())->first()->created_at ?? null;
-
-            if ($last_order != null) {
-
-                $createdAt = strtotime($last_order);
-                $currentTime = time();
-                $timeDifference = $currentTime - $createdAt;
-
-                if ($timeDifference < 50) {
-
-                    $notify = "Please wait for 10sec and try again";
-                    return redirect('user/orders')->with('error', $notify);
-
-
-                }
-
-            }
-
+        if ($request->payment == 'wallet') {
             $qtyRaw = $request->input('qty', 1);
             if (is_array($qtyRaw)) {
                 $qtyRaw = $qtyRaw[0] ?? 1;
             }
             $qty = max(1, min(10000, (int) $qtyRaw));
+            $productId = (int) $request->input('id');
 
-            $product = Product::active()->whereHas('category', function ($category) {
-                return $category->active();
-            })->findOrFail($request->input('id'));
+            try {
+                return DB::transaction(function () use ($request, $qty, $productId) {
+                    $userId = Auth::id();
+                    $user = User::where('id', $userId)->lockForUpdate()->firstOrFail();
 
-            $unsoldProductDetails = $product->unsoldProductDetails;
+                    $product = Product::active()
+                        ->whereHas('category', fn ($category) => $category->active())
+                        ->where('id', $productId)
+                        ->lockForUpdate()
+                        ->firstOrFail();
 
-            if ($unsoldProductDetails->count() < $qty) {
-                return redirect('/products')->with('error', "Product sold out or not enough quantity left.");
+                    $details = ProductDetail::query()
+                        ->where('product_id', $product->id)
+                        ->where('is_sold', Status::NO)
+                        ->orderBy('id')
+                        ->lockForUpdate()
+                        ->limit($qty)
+                        ->get();
+
+                    if ($details->count() < $qty) {
+                        return redirect('/products')->with('error', 'Product sold out or not enough quantity left.');
+                    }
+
+                    $lineTotal = (float) $product->price * $qty;
+                    if ($lineTotal <= 0) {
+                        return redirect('/products')->with('error', 'Invalid product pricing.');
+                    }
+
+                    $chargeAmount = $lineTotal;
+                    if ($request->filled('coupon_code')) {
+                        $ck = CouponCode::where('coupon_code', $request->coupon_code)->lockForUpdate()->first();
+                        if (! $ck) {
+                            return back()->with('error', 'Coupon does not exist');
+                        }
+                        if ((int) $ck->status === 2) {
+                            return back()->with('error', 'Coupon is not valid');
+                        }
+                        $couponAmount = ((float) $ck->amount / 100) * $lineTotal;
+                        $chargeAmount = $lineTotal - $couponAmount;
+                        if ($chargeAmount <= 0) {
+                            return back()->with('error', 'Invalid coupon for this order.');
+                        }
+                    }
+
+                    if ((float) $user->balance < (float) $chargeAmount) {
+                        return redirect('/products')->with('error', 'Insufficient funds. Fund your wallet first.');
+                    }
+
+                    User::where('id', $userId)->decrement('balance', $chargeAmount);
+
+                    $order = Order::create([
+                        'user_id' => $userId,
+                        'total_amount' => $chargeAmount,
+                        'product_id' => $product->id,
+                        'status' => 1,
+                    ]);
+
+                    foreach ($details as $detail) {
+                        $detail->update(['is_sold' => Status::YES]);
+                        OrderItem::create([
+                            'order_id' => $order->id,
+                            'product_id' => $product->id,
+                            'product_detail_id' => $detail->id,
+                            'price' => $product->price,
+                        ]);
+                    }
+
+                    $name = $product->name;
+
+                    $ref = Referre::where('refrere', $user->username)->where('status', 0)->lockForUpdate()->first();
+                    if ($ref) {
+                        $refAmount = $ref->amount;
+                        $referer = User::where('username', $ref->referer)->lockForUpdate()->first();
+                        if ($referer) {
+                            User::where('id', $referer->id)->increment('ref_wallet', $refAmount);
+                        }
+                        $ref->update(['status' => 1]);
+                    }
+
+                    Bought::create([
+                        'user_name' => $user->username,
+                        'qty' => $qty,
+                        'item' => $product->name,
+                        'amount' => $lineTotal,
+                    ]);
+
+                    $message = 'LOGS PLUG |' . $user->email . "| just bought | $qty | Product: $name | ₦" . number_format($chargeAmount, 2) . "\n\nIP => " . $request->ip();
+                    send_notification2($message);
+
+                    return redirect('user/orders')->with('message', 'Order Purchased Successfully');
+                });
+            } catch (\Throwable $e) {
+                Log::error('wallet purchase failed', ['exception' => $e->getMessage(), 'user_id' => Auth::id()]);
+
+                return redirect('/products')->with('error', 'Purchase could not be completed. Please try again.');
             }
-
-//            $alreadyBought = OrderItem::where('product_id', $product->id)
-//                ->whereHas('order', function ($q) {
-//                    $q->where('user_id', Auth::id());
-//                })->exists();
-//
-//            if ($alreadyBought) {
-//                return redirect('/products')->with('error', 'You have already purchased this product.');
-//            }
-
-            $amount = $product->price * $qty;
-            $balance = Auth::user()->balance ?? 0;
-
-
-            if ($balance < $amount) {
-                return redirect('/products')->with('error', 'Insufficient funds. Fund your wallet first.');
-            }
-
-
-            $final_amo = $amount;
-
-
-            if ($final_amo == 0 || $final_amo < $product->price) {
-
-                $message = "This user" . Auth::user()->email . " is a big thief";
-                send_notification2($message);
-                return redirect('/products')->with('error', 'stop playing games and fund your wallet.');
-
-            }
-
-
-            if ($request->coupon_code != null) {
-                $ck = CouponCode::where('coupon_code', $request->coupon_code)->first();
-                if (!$ck) return back()->with('error', 'Coupon does not exist');
-                if ($ck->status == 2) return back()->with('error', 'Coupon is not valid');
-
-                $coupon_amount = ($ck->amount / 100) * $final_amo;
-                $charge_amount = $final_amo - $coupon_amount;
-            } else {
-                $charge_amount = $final_amo;
-            }
-
-            User::where('id', Auth::id())->decrement('balance', $charge_amount);
-
-
-            $order = Order::create([
-                'user_id' => Auth::id(),
-                'total_amount' => $charge_amount,
-                'product_id' => $product->id,
-                'status' => 1,
-            ]);
-
-
-            foreach ($unsoldProductDetails->take($qty) as $detail) {
-                $detail->update(['is_sold' => 1]);
-
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'product_id' => $product->id,
-                    'product_detail_id' => $detail->id,
-                    'price' => $product->price,
-                ]);
-            }
-
-            Order::where('id', $order->id)->update(['product_id' => $product->id]);
-
-            $name = Product::where('id', $product->id)->first()->name ?? null;
-
-
-            $ref = Referre::where('refrere', Auth::user()->username)->where('status', 0)->first();
-            if ($ref) {
-                $ref_amount = $ref->amount;
-                User::where('username', $ref->referer)->increment('ref_wallet', $ref_amount);
-                $ref->update(['status' => 1]);
-            }
-
-            Bought::create([
-                'user_name' => Auth::user()->username,
-                'qty' => $qty,
-                'item' => $product->name,
-                'amount' => $amount,
-            ]);
-
-            $message = "LOGS PLUG |" . Auth::user()->email . "| just bought | $qty | Product: $name | ₦" . number_format($charge_amount, 2) . "\n\nIP => " . $request->ip();
-            send_notification2($message);
-
-            return redirect('user/orders')->with('message', 'Order Purchased Successfully');
-
-
         }
 
 

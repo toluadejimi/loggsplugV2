@@ -19,6 +19,7 @@ use App\Models\GatewayCurrency;
 use Illuminate\Support\Facades\Storage;
 use Stripe\Issuing\Transaction;
 use App\Http\Controllers\Controller;
+use App\Services\WalletFundWebhookService;
 use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
@@ -397,26 +398,6 @@ class UserController extends Controller
         $count_order = Order::where('user_id', Auth::id())->where('status', 1)->count();
         $order_sum = Order::where('user_id', Auth::id())->where('status', 1)->sum('total_amount');
 
-
-
-        $get_all_order =Order::where('user_id', Auth::id())->where('status', 1)->sum('total_amount');
-        $get_all_funded = Deposit::where('user_id', Auth::user()->id)->sum('amount');
-
-
-        $total_order = number_format($get_all_order, 2);
-        $total_funded = number_format($get_all_funded, 2);
-
-
-        if($get_all_funded < $get_all_order){
-
-            $message = "This user ====> |".Auth::user()->email." to be checked Total Order: $total_order | Total Funded: $total_funded";
-            send_notification($message);
-            send_notification2($message);
-
-            return redirect('/products')->with('error', 'Please Contact Admin');
-        }
-
-
         return view($this->activeTemplate . 'user.orders', compact('pageTitle', 'orders', 'count_order', 'order_sum'));
     }
 
@@ -539,62 +520,14 @@ class UserController extends Controller
     }
 
 
-    public function e_check(request $request){
-
-        $get_user =  User::where('email', $request->email)->first() ?? null;
-
-        if($get_user == null){
-
-            return response()->json([
-                'status' => false,
-                'message' => 'No user found, please check email and try again',
-            ]);
-        }
-
-
-        return response()->json([
-            'status' => true,
-            'user' => $get_user->username,
-        ]);
-
+    public function e_check(request $request)
+    {
+        return app(WalletFundWebhookService::class)->check($request);
     }
 
-
-    public function e_fund(request $request){
-
-        $get_user =  User::where('email', $request->email)->first() ?? null;
-
-        if($get_user == null){
-
-            return response()->json([
-                'status' => false,
-                'message' => 'No user found, please check email and try again',
-            ]);
-        }
-
-            User::where('email', $request->email)->increment('balance', $request->amount) ?? null;
-
-        $amount = number_format($request->amount, 2);
-
-        $get_depo = Deposit::where('trx', $request->order_id)->first() ?? null;
-        if ($get_depo == null){
-            $trx = new Deposit();
-            $trx->trx = $request->order_id;
-            $trx->status = 1;
-            $trx->user_id = $get_user->id;
-            $trx->amount = $request->amount;
-            $trx->method_code = 250;
-            $trx->save();
-        }else{
-            Deposit::where('trx', $request->order_id)->update(['status'=> 1]);
-        }
-
-
-        return response()->json([
-            'status' => true,
-            'message' => "NGN $amount has been successfully added to your wallet",
-        ]);
-
+    public function e_fund(request $request)
+    {
+        return app(WalletFundWebhookService::class)->fund($request);
     }
 
 
