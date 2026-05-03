@@ -24,7 +24,7 @@ class ManageUsersController extends Controller
     public function activeUsers()
     {
         $pageTitle = 'Active Users';
-        $users = $this->userData('active');
+        $users = $this->userData('active', orderByBalanceDesc: true);
         return view('admin.users.list', compact('pageTitle', 'users'));
     }
 
@@ -135,13 +135,21 @@ class ManageUsersController extends Controller
         return view('admin.users.list', compact('pageTitle', 'users'));
     }
 
-    protected function userData($scope = null){
+    protected function userData($scope = null, bool $orderByBalanceDesc = false)
+    {
         if ($scope) {
             $users = User::$scope();
-        }else{
+        } else {
             $users = User::query();
         }
-        return $users->searchable(['username','email'])->orderBy('id','desc')->paginate(getPaginate());
+        $users = $users->searchable(['username', 'email']);
+        if ($orderByBalanceDesc) {
+            $users->orderByDesc('balance')->orderByDesc('id');
+        } else {
+            $users->orderBy('id', 'desc');
+        }
+
+        return $users->paginate(getPaginate());
     }
 
 
