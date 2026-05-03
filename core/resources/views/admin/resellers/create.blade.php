@@ -6,17 +6,14 @@
                 <div class="card-body">
                     <form action="{{ route('admin.resellers.store') }}" method="POST">
                         @csrf
-                        <div class="form-group">
+                        <div class="form-group position-relative" id="reseller_user_select_wrapper">
                             <label>@lang('User')</label>
-                            <select name="user_id" class="form-control" required>
-                                <option value="">@lang('Select User')</option>
-                                @foreach($users as $u)
-                                    <option value="{{ $u->id }}" {{ old('user_id') == $u->id ? 'selected' : '' }}>
-                                        {{ $u->username }} ({{ $u->email }})
-                                    </option>
-                                @endforeach
+                            <select name="user_id" id="reseller_user_select" class="form-control" required>
+                                @if($oldUserId ?? null)
+                                    <option value="{{ $oldUserId }}" selected>{{ $oldUserLabel }}</option>
+                                @endif
                             </select>
-                            <small class="text-muted">Only users who are not already resellers are listed.</small>
+                            <small class="text-muted">@lang('Search by username or email. Only users who are not already resellers are listed.')</small>
                         </div>
                         <div class="form-group">
                             <label>@lang('Admin discount %')</label>
@@ -38,3 +35,36 @@
         </div>
     </div>
 @endsection
+
+@push('script')
+    <script>
+        (function ($) {
+            'use strict';
+            $('#reseller_user_select').select2({
+                ajax: {
+                    url: @json(route('admin.resellers.search-users')),
+                    dataType: 'json',
+                    delay: 300,
+                    data: function (params) {
+                        return {
+                            q: params.term,
+                            page: params.page || 1
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data.results,
+                            pagination: data.pagination
+                        };
+                    },
+                    cache: true
+                },
+                placeholder: @json(__('Type to search users…')),
+                allowClear: true,
+                width: '100%',
+                minimumInputLength: 0,
+                dropdownParent: $('#reseller_user_select_wrapper')
+            });
+        })(jQuery);
+    </script>
+@endpush

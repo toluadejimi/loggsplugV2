@@ -23,8 +23,50 @@ class ResellerController extends Controller
     public function create()
     {
         $pageTitle = 'Add Reseller';
-        $users = User::active()->whereDoesntHave('reseller')->orderBy('username')->get(['id', 'username', 'email']);
-        return view('admin.resellers.create', compact('pageTitle', 'users'));
+        $oldUserLabel = null;
+        $oldUserId = old('user_id');
+        if ($oldUserId) {
+            $u = User::find($oldUserId);
+            if ($u) {
+                $oldUserLabel = $u->username . ' (' . $u->email . ')';
+            }
+        }
+
+        return view('admin.resellers.create', compact('pageTitle', 'oldUserLabel', 'oldUserId'));
+    }
+
+    /**
+     * Select2 AJAX: active users who are not already resellers.
+     */
+    public function searchUsers(Request $request)
+    {
+        $term = trim((string) $request->get('q', ''));
+        $perPage = 25;
+
+        $query = User::active()->whereDoesntHave('reseller');
+
+        if ($term !== '') {
+            $like = '%' . addcslashes($term, '%_\\') . '%';
+            $query->where(function ($q) use ($like) {
+                $q->where('username', 'like', $like)
+                    ->orWhere('email', 'like', $like);
+            });
+        }
+
+        $users = $query->orderBy('username')
+            ->paginate($perPage, ['id', 'username', 'email'], 'page', max(1, (int) $request->get('page', 1)));
+
+        $results = $users->getCollection()->map(static function ($u) {
+            return [
+                'id' => $u->id,
+                'text' => $u->username . ' (' . $u->email . ')',
+            ];
+        })->values();
+
+        return response()->json([
+            'results' => $results,
+            'pagination' => ['more' => $users->hasMorePages()],
+        ]);
     }
 
     public function store(Request $request)
