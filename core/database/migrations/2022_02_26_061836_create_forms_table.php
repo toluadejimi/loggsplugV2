@@ -13,6 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
+        if (Schema::hasTable('forms')) {
+            return;
+        }
+
         Schema::create('forms', function (Blueprint $table) {
             $table->id();
             $table->string('act',40)->nullable();

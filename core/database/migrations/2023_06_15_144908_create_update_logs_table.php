@@ -13,6 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
+        if (Schema::hasTable('update_logs')) {
+            return;
+        }
+
         Schema::create('update_logs', function (Blueprint $table) {
             $table->id();
             $table->string('version',40)->nullable();

@@ -8,6 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (! Schema::hasTable('resellers') || Schema::hasColumn('resellers', 'settlement_account')) {
+            return;
+        }
+
         Schema::table('resellers', function (Blueprint $table) {
             $table->text('settlement_account')->nullable()->after('contact_email');
         });
@@ -15,6 +19,10 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (! Schema::hasTable('resellers') || ! Schema::hasColumn('resellers', 'settlement_account')) {
+            return;
+        }
+
         Schema::table('resellers', function (Blueprint $table) {
             $table->dropColumn('settlement_account');
         });
