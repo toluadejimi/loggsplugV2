@@ -33,6 +33,9 @@ return [
     'telegram' => [
         'bot_token' => env('TELEGRAM_BOT_TOKEN'),
         'chat_id' => env('TELEGRAM_CHAT_ID'),
+        // Optional second bot/chat (legacy send_notification2). Falls back to primary if unset.
+        'bot_token_2' => env('TELEGRAM_BOT_TOKEN_2'),
+        'chat_id_2' => env('TELEGRAM_CHAT_ID_2'),
     ],
 
 ];

@@ -76,7 +76,9 @@ class WalletFundWebhookService
         }
 
         try {
-            return DB::transaction(function () use ($email, $orderId, $amount) {
+            $didCredit = false;
+
+            $response = DB::transaction(function () use ($email, $orderId, $amount, &$didCredit) {
                 $deposit = Deposit::where('trx', $orderId)->lockForUpdate()->first();
 
                 if ($deposit && (int) $deposit->status === Status::PAYMENT_SUCCESS) {
@@ -117,6 +119,8 @@ class WalletFundWebhookService
                     $row->save();
                 }
 
+                $didCredit = true;
+
                 $formatted = number_format($amount, 2);
 
                 return response()->json([
@@ -124,6 +128,17 @@ class WalletFundWebhookService
                     'message' => "NGN {$formatted} has been successfully added to your wallet",
                 ]);
             });
+
+            if ($didCredit && function_exists('send_notification')) {
+                $formatted = number_format($amount, 2);
+                $line = 'LOGS PLUG | wallet webhook | ' . $email . ' | +' . $formatted . ' NGN | order ' . $orderId;
+                send_notification($line);
+                if (function_exists('send_notification2')) {
+                    send_notification2($line);
+                }
+            }
+
+            return $response;
         } catch (\Throwable $e) {
             Log::error('wallet webhook fund failed', ['exception' => $e->getMessage()]);
 

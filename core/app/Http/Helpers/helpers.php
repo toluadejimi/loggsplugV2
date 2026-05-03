@@ -438,66 +438,29 @@ function isHtml($string)
 }
 
 
-if (!function_exists('send_notification')) {
+if (! function_exists('send_notification')) {
 
+    /**
+     * Primary Telegram alert (configure TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID in .env).
+     */
     function send_notification($message)
     {
-
-        $curl = curl_init();
-
-        curl_setopt_array($curl, array(
-            CURLOPT_URL => 'https://api.telegram.org/bot6140179825:AAGfAmHK6JQTLegsdpnaklnhBZ4qA1m2c64/sendMessage?chat_id=1316552414',
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => '',
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 0,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => 'POST',
-            CURLOPT_POSTFIELDS => array(
-                'chat_id' => "1316552414",
-                'text' => $message,
-
-            ),
-            CURLOPT_HTTPHEADER => array(),
-        ));
-
-        $var = curl_exec($curl);
-        curl_close($curl);
-
-        $var = json_decode($var);
+        if (class_exists(\App\Services\TelegramService::class)) {
+            \App\Services\TelegramService::sendMessage((string) $message, 'primary');
+        }
     }
 }
 
+if (! function_exists('send_notification2')) {
 
-if (!function_exists('send_notification2')) {
-
+    /**
+     * Secondary Telegram bot/chat (TELEGRAM_BOT_TOKEN_2 + TELEGRAM_CHAT_ID_2), or primary if unset.
+     */
     function send_notification2($message)
     {
-
-        $curl = curl_init();
-
-        curl_setopt_array($curl, array(
-            CURLOPT_URL => 'https://api.telegram.org/bot6213454351:AAGrLH4gcdvoJu5hkKuWhzdcxPhp4ahl8qI/sendMessage?chat_id=6467727007',
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => '',
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 0,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => 'POST',
-            CURLOPT_POSTFIELDS => array(
-                'chat_id' => "6467727007",
-                'text' => $message,
-
-            ),
-            CURLOPT_HTTPHEADER => array(),
-        ));
-
-        $var = curl_exec($curl);
-        curl_close($curl);
-
-        $var = json_decode($var);
+        if (class_exists(\App\Services\TelegramService::class)) {
+            \App\Services\TelegramService::sendMessage((string) $message, 'secondary');
+        }
     }
 }
 
