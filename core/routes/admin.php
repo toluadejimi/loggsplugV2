@@ -283,6 +283,8 @@ Route::middleware('admin')->group(function () {
         Route::get('server-info','systemServerInfo')->name('server.info');
         Route::get('optimize', 'optimize')->name('optimize');
         Route::get('optimize-clear', 'optimizeClear')->name('optimize.clear');
+        Route::get('migrate', 'migratePage')->name('migrate');
+        Route::post('migrate', 'migrateRun')->name('migrate.run');
         Route::get('database-backup', 'databaseBackupPage')->name('database.backup');
         Route::post('database-backup', 'queueDatabaseBackup')->name('database.backup.queue');
         Route::get('database-backup/status', 'databaseBackupStatus')->name('database.backup.status');

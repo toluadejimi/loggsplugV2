@@ -136,6 +136,7 @@ class ProductController extends Controller
         $batchSize = 500;
         $batch = [];
         $hasIsSold = Schema::hasColumn('product_details', 'is_sold');
+        $hasUserId = Schema::hasColumn('product_details', 'user_id');
 
         try {
             while (($line = fgets($handle)) !== false) {
@@ -146,11 +147,13 @@ class ProductController extends Controller
 
                 $row = [
                     'product_id' => $productId,
-                    'user_id' => 0,
                     'details' => $line,
                     'created_at' => $now,
                     'updated_at' => $now,
                 ];
+                if ($hasUserId) {
+                    $row['user_id'] = 0;
+                }
                 if ($hasIsSold) {
                     $row['is_sold'] = Status::NO;
                 }

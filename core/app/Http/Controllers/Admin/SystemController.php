@@ -36,6 +36,31 @@ class SystemController extends Controller
         return back()->withNotify($notify);
     }
 
+    public function migratePage()
+    {
+        $pageTitle = 'Database migrations';
+
+        return view('admin.system.migrate', compact('pageTitle'));
+    }
+
+    public function migrateRun(Request $request)
+    {
+        try {
+            Artisan::call('migrate', ['--force' => true]);
+            $output = trim(Artisan::output());
+            $notify[] = ['success', 'Migrations finished.'];
+            if ($output !== '') {
+                $request->session()->flash('migrate_cli_output', $output);
+            }
+
+            return back()->withNotify($notify);
+        } catch (\Throwable $e) {
+            $notify[] = ['error', 'Migration failed: ' . $e->getMessage()];
+
+            return back()->withNotify($notify);
+        }
+    }
+
     public function systemServerInfo(){
         $currentPHP = phpversion();
         $pageTitle = 'Server Information';

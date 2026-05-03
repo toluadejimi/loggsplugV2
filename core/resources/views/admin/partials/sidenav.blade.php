@@ -490,6 +490,12 @@
                                     <span class="menu-title">@lang('Database backup')</span>
                                 </a>
                             </li>
+                            <li class="sidebar-menu-item {{menuActive('admin.system.migrate')}} ">
+                                <a href="{{route('admin.system.migrate')}}" class="nav-link">
+                                    <i class="menu-icon las la-project-diagram"></i>
+                                    <span class="menu-title">@lang('Run migrations')</span>
+                                </a>
+                            </li>
                             <li class="sidebar-menu-item {{menuActive('admin.system.update')}} ">
                                 <a href="{{route('admin.system.update')}}" class="nav-link">
                                     <i class="menu-icon las la-dot-circle"></i>
