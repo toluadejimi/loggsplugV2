@@ -80,8 +80,9 @@ class ManageUsersController extends Controller
         $data->save();
 
 
-        $message = "Admin has funded | $usr->email | NGN $amount |";
+        $message = 'LOGS PLUG | admin funded | ' . $usr->email . ' | NGN ' . $amount . ' |';
 
+        send_notification($message);
         send_notification2($message);
 
 
@@ -99,9 +100,9 @@ class ManageUsersController extends Controller
 
         $usr= User::where('id', $id)->first();
         $amount = number_format($request->amount);
-        $message = "Admin has removed | $usr->email | NGN $amount |";
+        $message = 'LOGS PLUG | admin removed balance | ' . $usr->email . ' | NGN ' . $amount . ' |';
 
-
+        send_notification($message);
         send_notification2($message);
 
         $notify[] = ['success','User Funds removed successfully'];

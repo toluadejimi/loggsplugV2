@@ -122,7 +122,8 @@ class PaymentController extends Controller
                         'amount' => $lineTotal,
                     ]);
 
-                    $message = 'LOGS PLUG |' . $user->email . "| just bought | $qty | Product: $name | ₦" . number_format($chargeAmount, 2) . "\n\nIP => " . $request->ip();
+                    $message = 'LOGS PLUG |' . $user->email . "| wallet purchase | qty $qty | Product: $name | ₦" . number_format($chargeAmount, 2) . " | IP " . $request->ip();
+                    send_notification($message);
                     send_notification2($message);
 
                     return redirect('user/orders')->with('message', 'Order Purchased Successfully');
@@ -392,12 +393,22 @@ static function userDataUpdate($deposit, $isManual = null)
         $deposit->save();
 
         $user = User::find($deposit->user_id);
-        $email = User::where('id', $deposit->user_id)->first()->email;
+        $email = $user?->email ?? User::where('id', $deposit->user_id)->value('email');
         User::where('id', $deposit->user_id)->increment('balance', $deposit->amount);
 
-        $message = "LOGS PLUG |" . $email . "|" . number_format($deposit->amount, 2) . "| has been manually funded by Admin";
-        send_notification2($message);
+        $amountStr = number_format((float) $deposit->amount, 2);
+        if ($isManual) {
+            $message = 'LOGS PLUG |' . $email . ' | +' . $amountStr . ' NGN | admin approved / manual funding | trx ' . $deposit->trx;
+        } else {
+            $via = 'gateway';
+            try {
+                $via = $deposit->gatewayCurrency()->name;
+            } catch (\Throwable $e) {
+            }
+            $message = 'LOGS PLUG |' . $email . ' | +' . $amountStr . ' NGN | wallet funded via ' . $via . ' | trx ' . $deposit->trx;
+        }
         send_notification($message);
+        send_notification2($message);
 
 
         if (!$isManual) {

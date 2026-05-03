@@ -36,6 +36,8 @@ return [
         // Optional second bot/chat (legacy send_notification2). Falls back to primary if unset.
         'bot_token_2' => env('TELEGRAM_BOT_TOKEN_2'),
         'chat_id_2' => env('TELEGRAM_CHAT_ID_2'),
+        // Set to false only if the server cannot verify TLS to api.telegram.org (diagnose with php artisan telegram:test).
+        'verify_ssl' => filter_var(env('TELEGRAM_HTTP_VERIFY', true), FILTER_VALIDATE_BOOLEAN),
     ],
 
 ];

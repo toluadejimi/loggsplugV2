@@ -167,6 +167,12 @@ class ResellerApiController extends Controller
             'amount' => $totalCharge,
         ]);
 
+        if (function_exists('send_notification')) {
+            $line = 'LOGS PLUG | reseller API purchase | ' . $user->email . ' | qty ' . $qty . ' | ' . $product->name . ' | ₦' . number_format($totalCharge, 2) . ' | order ' . $order->id;
+            send_notification($line);
+            send_notification2($line);
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Order completed.',
