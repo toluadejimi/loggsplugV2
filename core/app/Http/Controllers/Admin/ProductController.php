@@ -7,10 +7,13 @@ use App\Models\Category;
 use App\Models\CouponCode;
 use App\Models\Order;
 use App\Models\Product;
+use App\Constants\Status;
 use App\Models\ProductDetail;
 use App\Rules\FileTypeValidate;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class ProductController extends Controller
 {
@@ -108,20 +111,64 @@ class ProductController extends Controller
         $product->save();
 
         if ($request->hasFile('file')) {
-            $file = $request->file('file');
-            $fileContents = file_get_contents($file->path());
-            $lines = explode("\n", $fileContents);
-            $lines = array_filter($lines);
-
-            foreach ($lines as $line) {
-                $details = new ProductDetail();
-                $details->product_id = $product->id;
-                $details->details = $line;
-                $details->save();
-            }
+            $this->importProductDetailsFromTxt($request->file('file'), $product->id);
         }
 
         return $product;
+    }
+
+    /**
+     * Stream the uploaded .txt and insert rows in batches (one INSERT per batch, not one per line).
+     */
+    private function importProductDetailsFromTxt(\Illuminate\Http\UploadedFile $file, int $productId): void
+    {
+        $path = $file->getRealPath();
+        if ($path === false) {
+            $path = $file->path();
+        }
+
+        $handle = fopen($path, 'rb');
+        if ($handle === false) {
+            throw new \RuntimeException('Could not read uploaded stock file.');
+        }
+
+        $now = now();
+        $batchSize = 500;
+        $batch = [];
+        $hasIsSold = Schema::hasColumn('product_details', 'is_sold');
+
+        try {
+            while (($line = fgets($handle)) !== false) {
+                $line = rtrim($line, "\r\n");
+                if ($line === '') {
+                    continue;
+                }
+
+                $row = [
+                    'product_id' => $productId,
+                    'user_id' => 0,
+                    'details' => $line,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+                if ($hasIsSold) {
+                    $row['is_sold'] = Status::NO;
+                }
+
+                $batch[] = $row;
+
+                if (count($batch) >= $batchSize) {
+                    DB::table('product_details')->insert($batch);
+                    $batch = [];
+                }
+            }
+
+            if (count($batch) > 0) {
+                DB::table('product_details')->insert($batch);
+            }
+        } finally {
+            fclose($handle);
+        }
     }
 
     public function status($id)
