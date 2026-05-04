@@ -22,7 +22,8 @@ class ResellerController extends Controller
                 'user:username',
                 'user:email',
             ])
-            ->orderBy('id', 'desc')
+            ->orderByDesc('orders_count')
+            ->orderByDesc('id')
             ->paginate(getPaginate());
         $emptyMessage = 'No resellers yet.';
         return view('admin.resellers.index', compact('pageTitle', 'resellers', 'emptyMessage'));
