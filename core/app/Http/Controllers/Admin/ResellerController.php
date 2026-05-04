@@ -14,6 +14,14 @@ class ResellerController extends Controller
     {
         $pageTitle = 'Resellers';
         $resellers = Reseller::with('user:id,username,email,balance')
+            ->withCount('orders')
+            ->searchable([
+                'business_name',
+                'contact_email',
+                'api_key',
+                'user:username',
+                'user:email',
+            ])
             ->orderBy('id', 'desc')
             ->paginate(getPaginate());
         $emptyMessage = 'No resellers yet.';

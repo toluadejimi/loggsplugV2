@@ -3,11 +3,14 @@
 namespace App\Models;
 
 use App\Constants\Status;
+use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 class Reseller extends Model
 {
+    use Searchable;
+
     protected $fillable = [
         'user_id',
         'api_key',

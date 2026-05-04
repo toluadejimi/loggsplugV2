@@ -12,6 +12,7 @@
                                 <th>@lang('Business')</th>
                                 <th>@lang('Discount %')</th>
                                 <th>@lang('Balance')</th>
+                                <th>@lang('API orders')</th>
                                 <th>@lang('Status')</th>
                                 <th>@lang('API Key')</th>
                                 <th>@lang('Action')</th>
@@ -21,12 +22,23 @@
                             @forelse($resellers as $r)
                                 <tr>
                                     <td>
-                                        <span class="fw-bold">{{ $r->user->username ?? '-' }}</span>
-                                        <br><span class="small">{{ $r->user->email ?? '' }}</span>
+                                        @if($r->user)
+                                            <a href="{{ route('admin.users.detail', $r->user->id) }}" class="text--primary">
+                                                <span class="fw-bold d-inline-block">{{ $r->user->username }}</span>
+                                                <br><span class="small">{{ $r->user->email }}</span>
+                                            </a>
+                                        @else
+                                            <span class="text-muted">—</span>
+                                        @endif
                                     </td>
                                     <td>{{ $r->business_name ?: '-' }}</td>
                                     <td>{{ $r->admin_discount_percent }}%</td>
                                     <td>{{ $general->cur_sym }}{{ showAmount($r->user->balance ?? 0) }}</td>
+                                    <td>
+                                        <a href="{{ route('admin.resellers.orders', $r->id) }}" class="fw-bold text--primary">
+                                            {{ $r->orders_count ?? 0 }}
+                                        </a>
+                                    </td>
                                     <td>
                                         @if($r->status == Status::ENABLE && !$r->api_key_revoked_at)
                                             <span class="badge badge--success">@lang('Active')</span>
@@ -70,6 +82,7 @@
 @endsection
 
 @push('breadcrumb-plugins')
+    <x-search-form placeholder="Username, email, business, API key…" />
     <a href="{{ route('admin.resellers.create') }}" class="btn btn-sm btn--primary">
         <i class="las la-plus"></i> @lang('Add Reseller')
     </a>
