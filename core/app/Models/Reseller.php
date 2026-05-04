@@ -18,6 +18,7 @@ class Reseller extends Model
         'status',
         'business_name',
         'contact_email',
+        'api_site_url',
         'settlement_account',
         'api_key_revoked_at',
     ];
@@ -70,6 +71,28 @@ class Reseller extends Model
     public static function generateApiKey(): string
     {
         return 'rsl_' . Str::random(48);
+    }
+
+    /**
+     * Normalize reseller public site URL (https default, no trailing slash).
+     */
+    public static function normalizeApiSiteUrl(?string $url): ?string
+    {
+        $url = trim((string) $url);
+        if ($url === '') {
+            return null;
+        }
+        if (! preg_match('#^https?://#i', $url)) {
+            $url = 'https://' . $url;
+        }
+        $url = rtrim($url, '/');
+
+        return filter_var($url, FILTER_VALIDATE_URL) ? $url : null;
+    }
+
+    public function hasApiSiteUrl(): bool
+    {
+        return self::normalizeApiSiteUrl($this->api_site_url) !== null;
     }
 
     /**

@@ -33,6 +33,12 @@
                 <p class="reseller-hero__sub">Use your API key to list products, place orders, and manage your reseller account programmatically.</p>
             </div>
 
+            @if($reseller && !$reseller->hasApiSiteUrl())
+                <div class="alert alert-warning mb-4">
+                    @lang('You must save your public site URL on the') <a href="{{ route('user.reseller.index') }}" class="alert-link">@lang('Reseller')</a> @lang('page before authenticated API calls will succeed.')
+                </div>
+            @endif
+
             <div class="reseller-card mb-4">
                 <div class="reseller-card__body">
                     <h3 class="reseller-card__heading">Base URL</h3>
@@ -51,6 +57,13 @@
                         <li><strong>Body (POST/PUT):</strong> <code>api_key: your_api_key</code></li>
                     </ul>
                     <p class="reseller-card__desc mb-0 small text-muted">You can generate or copy your key from the <a href="{{ route('user.reseller.index') }}">Reseller</a> page.</p>
+                </div>
+            </div>
+
+            <div class="reseller-card mb-4">
+                <div class="reseller-card__body">
+                    <h3 class="reseller-card__heading">@lang('Site URL requirement')</h3>
+                    <p class="reseller-card__desc mb-0">@lang('After your API key works, you must register the public HTTPS URL of your shop or integration on the') <a href="{{ route('user.reseller.index') }}">@lang('Reseller dashboard')</a>. @lang('Until then, endpoints return 403 with code') <code>SITE_URL_REQUIRED</code>.</p>
                 </div>
             </div>
 

@@ -46,6 +46,14 @@ class ResellerApiAuth
             ], 403);
         }
 
+        if (! $reseller->hasApiSiteUrl()) {
+            return response()->json([
+                'success' => false,
+                'code' => 'SITE_URL_REQUIRED',
+                'message' => 'Set your public shop or site URL in the Reseller dashboard before using the API.',
+            ], 403);
+        }
+
         $request->attributes->set('reseller', $reseller);
         return $next($request);
     }

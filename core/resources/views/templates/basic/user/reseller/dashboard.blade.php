@@ -42,6 +42,27 @@
             @endif
 
             <div class="row g-4">
+                {{-- Site URL (required before API works) --}}
+                <div class="col-12">
+                    <div class="reseller-card {{ $reseller->hasApiSiteUrl() ? '' : 'border-warning' }}" style="{{ $reseller->hasApiSiteUrl() ? '' : 'border-width: 2px;' }}">
+                        <div class="reseller-card__icon reseller-card__icon--info"><i class="las la-link"></i></div>
+                        <div class="reseller-card__body flex-grow-1">
+                            <h3 class="reseller-card__heading">@lang('Public shop / site URL')</h3>
+                            <p class="reseller-card__desc">@lang('Enter the HTTPS address of the site or app where you use the API. Calls are rejected until this is saved.')</p>
+                            @if(!$reseller->hasApiSiteUrl())
+                                <div class="alert alert-warning py-2 px-3 small mb-3">@lang('API requests will return HTTP 403 until you save a valid URL below.')</div>
+                            @endif
+                            <form method="post" action="{{ route('user.reseller.site-url') }}" class="reseller-form">
+                                @csrf
+                                <label class="form-label small text-muted">@lang('Site URL')</label>
+                                <div class="input-group">
+                                    <input type="text" name="api_site_url" class="form-control" value="{{ old('api_site_url', $reseller->api_site_url) }}" placeholder="https://yoursite.com or yoursite.com" required maxlength="500">
+                                    <button type="submit" class="btn btn-primary">@lang('Save')</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
                 {{-- API Key --}}
                 <div class="col-12">
                     <div class="reseller-card">

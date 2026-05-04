@@ -18,6 +18,7 @@ class ResellerController extends Controller
             ->searchable([
                 'business_name',
                 'contact_email',
+                'api_site_url',
                 'api_key',
                 'user:username',
                 'user:email',
@@ -85,6 +86,7 @@ class ResellerController extends Controller
             'admin_discount_percent' => 'nullable|numeric|min:0|max:99.99',
             'business_name' => 'nullable|string|max:255',
             'contact_email' => 'nullable|email',
+            'api_site_url' => 'nullable|string|max:500',
         ]);
 
         $user = User::findOrFail($request->user_id);
@@ -100,6 +102,7 @@ class ResellerController extends Controller
             'status' => Status::ENABLE,
             'business_name' => $request->business_name,
             'contact_email' => $request->contact_email ?? $user->email,
+            'api_site_url' => Reseller::normalizeApiSiteUrl($request->input('api_site_url')),
         ]);
 
         $notify[] = ['success', 'Reseller created. API key is shown on the reseller list.'];
@@ -122,6 +125,7 @@ class ResellerController extends Controller
             'status' => 'required|in:0,1',
             'business_name' => 'nullable|string|max:255',
             'contact_email' => 'nullable|email',
+            'api_site_url' => 'nullable|string|max:500',
         ]);
 
         $reseller->update([
@@ -129,6 +133,7 @@ class ResellerController extends Controller
             'status' => (int) $request->status,
             'business_name' => $request->business_name,
             'contact_email' => $request->contact_email,
+            'api_site_url' => Reseller::normalizeApiSiteUrl($request->input('api_site_url')),
         ]);
 
         $notify[] = ['success', 'Reseller updated.'];

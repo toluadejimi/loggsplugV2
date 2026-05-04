@@ -35,6 +35,11 @@
                             <label>@lang('Contact email')</label>
                             <input type="email" name="contact_email" class="form-control" value="{{ old('contact_email', $reseller->contact_email) }}">
                         </div>
+                        <div class="form-group">
+                            <label>@lang('Public site URL (API)')</label>
+                            <input type="text" name="api_site_url" class="form-control" value="{{ old('api_site_url', $reseller->api_site_url) }}" placeholder="https://reseller-shop.example.com">
+                            <small class="text-muted">@lang('Leave empty to clear. Reseller API is blocked until a valid URL is set.')</small>
+                        </div>
                         <button type="submit" class="btn btn--primary">@lang('Update')</button>
                     </form>
                 </div>

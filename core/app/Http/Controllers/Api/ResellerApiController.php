@@ -233,6 +233,7 @@ class ResellerApiController extends Controller
                 'balance' => (float) ($user->balance ?? 0),
                 'business_name' => $reseller->business_name,
                 'admin_discount_percent' => (float) $reseller->admin_discount_percent,
+                'api_site_url' => $reseller->api_site_url,
             ],
         ]);
     }

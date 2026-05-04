@@ -63,6 +63,35 @@ class ResellerController extends Controller
         return view($this->activeTemplate . 'user.reseller.api-docs', compact('pageTitle', 'user', 'reseller', 'baseUrl'));
     }
 
+    /**
+     * Public URL where the reseller uses the API (required before API calls succeed).
+     */
+    public function updateSiteUrl(Request $request)
+    {
+        $user = auth()->user();
+        $reseller = $user->reseller;
+        if (! $reseller || ! $reseller->isActive()) {
+            $notify[] = ['error', 'Reseller account not available.'];
+            return back()->withNotify($notify);
+        }
+
+        $request->validate([
+            'api_site_url' => ['required', 'string', 'max:500'],
+        ]);
+
+        $normalized = Reseller::normalizeApiSiteUrl($request->api_site_url);
+        if ($normalized === null) {
+            $notify[] = ['error', 'Enter a valid URL (for example https://shop.example.com).'];
+            return back()->withNotify($notify)->withInput();
+        }
+
+        $reseller->api_site_url = $normalized;
+        $reseller->save();
+
+        $notify[] = ['success', 'Site URL saved. You can use the API from your integration.'];
+        return back()->withNotify($notify);
+    }
+
     public function proInstallSubmit(Request $request)
     {
         $request->validate([

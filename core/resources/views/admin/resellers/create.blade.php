@@ -28,6 +28,11 @@
                             <label>@lang('Contact email')</label>
                             <input type="email" name="contact_email" class="form-control" value="{{ old('contact_email') }}" placeholder="Optional, defaults to user email">
                         </div>
+                        <div class="form-group">
+                            <label>@lang('Public site URL (API)')</label>
+                            <input type="text" name="api_site_url" class="form-control" value="{{ old('api_site_url') }}" placeholder="https://reseller-shop.example.com">
+                            <small class="text-muted">@lang('Optional here; reseller must set a valid URL before API calls work.')</small>
+                        </div>
                         <button type="submit" class="btn btn--primary">@lang('Create Reseller')</button>
                     </form>
                 </div>
