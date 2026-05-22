@@ -77,10 +77,10 @@
                 </a>
             </div>
 
-            {{-- Latest payments --}}
+            {{-- Latest transactions --}}
             <section class="udashboard__section">
                 <div class="udashboard__section-head">
-                    <h2 class="udashboard__section-title">@lang('Latest Payments')</h2>
+                    <h2 class="udashboard__section-title">@lang('Latest Transactions')</h2>
                     <a href="{{ route('user.deposit.history') }}" class="udashboard__section-link">@lang('View all') <i class="las la-arrow-right"></i></a>
                 </div>
                 <div class="udashboard__table-wrap">
@@ -95,15 +95,21 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($latestDeposits as $deposit)
+                            @forelse($latestTransactions as $transaction)
                             <tr>
-                                <td><code class="udashboard__trx">{{ $deposit->trx }}</code></td>
-                                <td><span class="udashboard__muted">{{ diffForHumans($deposit->created_at) }}</span></td>
-                                <td><strong>{{ $general->cur_sym }}{{ showAmount($deposit->amount) }}</strong></td>
-                                <td>@php echo $deposit->statusBadge; @endphp</td>
+                                <td><code class="udashboard__trx">{{ $transaction->reference }}</code></td>
+                                <td><span class="udashboard__muted">{{ diffForHumans($transaction->created_at) }}</span></td>
                                 <td>
-                                    @if($deposit->status == 0)
-                                        <a href="/user/resolve-deposit?trx={{ $deposit->trx }}" class="udashboard__btn-resolve">@lang('Resolve')</a>
+                                    <strong class="{{ $transaction->type === 'debit' ? 'text-danger' : 'text-success' }}">
+                                        {{ $transaction->type === 'debit' ? '-' : '+' }}{{ $general->cur_sym }}{{ showAmount($transaction->amount) }}
+                                    </strong>
+                                </td>
+                                <td>@php echo $transaction->status_html; @endphp</td>
+                                <td>
+                                    @if($transaction->is_resolvable)
+                                        <a href="{{ $transaction->resolve_url }}" class="udashboard__btn-resolve">@lang('Resolve')</a>
+                                    @elseif($transaction->details_url)
+                                        <a href="{{ $transaction->details_url }}" class="udashboard__btn-resolve">@lang('View')</a>
                                     @else
                                         <span class="udashboard__muted">—</span>
                                     @endif
@@ -111,7 +117,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="5" class="udashboard__empty">{{ __($emptyMessage ?? 'No payments yet') }}</td>
+                                <td colspan="5" class="udashboard__empty">{{ __($emptyMessage ?? 'No transactions yet') }}</td>
                             </tr>
                             @endforelse
                         </tbody>

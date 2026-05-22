@@ -33,12 +33,49 @@ class UserController extends Controller
         $widget['total_orders'] = Order::where('user_id', $user->id)->paid()->count();
         $widget['total_tickets'] = SupportTicket::where('user_id', $user->id)->count();
 
-        //$latestDeposits = $user->deposits()->take(5)->get();
+        $latestDeposits = Deposit::where('user_id', Auth::id())
+            ->with('gateway', 'order')
+            ->orderBy('id', 'desc')
+            ->take(10)
+            ->get()
+            ->map(function ($deposit) {
+                return (object) [
+                    'type' => 'credit',
+                    'reference' => $deposit->trx,
+                    'created_at' => $deposit->created_at,
+                    'amount' => $deposit->amount,
+                    'status_html' => $deposit->statusBadge,
+                    'is_resolvable' => (int) $deposit->status === Status::PAYMENT_INITIATE,
+                    'resolve_url' => route('user.resolve.deposit') . '?trx=' . urlencode($deposit->trx),
+                    'details_url' => null,
+                ];
+            });
 
-        $latestDeposits = Deposit::latest()->where('user_id', Auth::id())->with('gateway', 'order')->orderBy('id', 'desc')->take(10)->get();
+        $latestDebits = Order::where('user_id', Auth::id())
+            ->paid()
+            ->orderBy('id', 'desc')
+            ->take(10)
+            ->get()
+            ->map(function ($order) {
+                return (object) [
+                    'type' => 'debit',
+                    'reference' => 'ORDER #' . $order->id,
+                    'created_at' => $order->created_at,
+                    'amount' => $order->total_amount,
+                    'status_html' => '<span class="badge badge--danger">' . trans('Debit') . '</span>',
+                    'is_resolvable' => false,
+                    'resolve_url' => null,
+                    'details_url' => route('user.order.details', $order->id),
+                ];
+            });
 
+        $latestTransactions = $latestDeposits
+            ->concat($latestDebits)
+            ->sortByDesc(fn ($transaction) => $transaction->created_at)
+            ->take(10)
+            ->values();
 
-        return view($this->activeTemplate . 'user.dashboard', compact('pageTitle', 'user', 'widget', 'latestDeposits'));
+        return view($this->activeTemplate . 'user.dashboard', compact('pageTitle', 'user', 'widget', 'latestTransactions'));
     }
 
 
