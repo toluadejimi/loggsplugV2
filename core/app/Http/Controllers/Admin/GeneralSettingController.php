@@ -224,6 +224,9 @@ class GeneralSettingController extends Controller
         $notice->save();
 
         $notify[] = ['success', 'Login notice updated successfully'];
+        if (! $request->status) {
+            $notify[] = ['warning', 'Notice is currently Disabled. Enable it for the popup to show on /products.'];
+        }
         return back()->withNotify($notify);
     }
 

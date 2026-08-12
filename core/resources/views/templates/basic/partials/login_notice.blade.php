@@ -1,47 +1,79 @@
 @php
-    $loginNotice = \App\Models\Frontend::where('data_keys', 'login_notice.data')->first();
-    $noticeEnabled = @$loginNotice->data_values->status == \App\Constants\Status::ENABLE
-        && !empty(@$loginNotice->data_values->description);
+    $loginNotice = \App\Models\Frontend::firstOrCreate(
+        ['data_keys' => 'login_notice.data'],
+        [
+            'data_values' => [
+                'status' => \App\Constants\Status::ENABLE,
+                'title' => 'Notice',
+                'description' => '<p>Welcome! Update this message in Admin → Login Notice.</p>',
+            ],
+        ]
+    );
 
-    // Show on /products every reload; also after login on other pages (one-shot session flag).
-    $onProductsPage = request()->routeIs('products');
+    $values = $loginNotice->data_values;
+    $status = is_object($values) ? ($values->status ?? 0) : 0;
+    $title = is_object($values) ? ($values->title ?? 'Notice') : 'Notice';
+    $description = is_object($values) ? trim((string) ($values->description ?? '')) : '';
+    $noticeEnabled = in_array((string) $status, ['1', 'true'], true) || $status === true || (int) $status === \App\Constants\Status::ENABLE;
+    $noticeEnabled = $noticeEnabled && $description !== '';
+
+    $path = trim(request()->path(), '/');
+    $onProductsPage = request()->routeIs('products')
+        || $path === 'products'
+        || str_starts_with($path, 'products/');
+
     $showAfterLogin = (bool) session()->pull('show_login_notice', false);
     $showLoginNotice = $noticeEnabled && ($onProductsPage || $showAfterLogin);
 @endphp
 
 @if ($showLoginNotice)
-<div class="modal fade" id="loginNoticeModal" tabindex="-1" aria-labelledby="loginNoticeTitle" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content login-notice-modal">
-            <div class="modal-header login-notice-modal__header">
-                <h5 class="modal-title login-notice-modal__title" id="loginNoticeTitle">
-                    <i class="las la-bell"></i>
-                    <span>{{ @$loginNotice->data_values->title ?: __('Notice') }}</span>
-                </h5>
-            </div>
-            <div class="modal-body login-notice-modal__body">
-                @php echo @$loginNotice->data_values->description @endphp
-            </div>
-            <div class="modal-footer login-notice-modal__footer">
-                <button type="button" class="btn login-notice-modal__close" id="loginNoticeCloseBtn">@lang('Close')</button>
-            </div>
+<div id="loginNoticeOverlay" class="login-notice-overlay" role="dialog" aria-modal="true" aria-labelledby="loginNoticeTitle">
+    <div class="login-notice-card">
+        <div class="login-notice-card__header">
+            <h5 class="login-notice-card__title" id="loginNoticeTitle">
+                <i class="las la-bell"></i>
+                <span>{{ $title ?: __('Notice') }}</span>
+            </h5>
+        </div>
+        <div class="login-notice-card__body">
+            @php echo $description @endphp
+        </div>
+        <div class="login-notice-card__footer">
+            <button type="button" class="login-notice-card__close" id="loginNoticeCloseBtn">@lang('Close')</button>
         </div>
     </div>
 </div>
 
 <style>
-.login-notice-modal {
+.login-notice-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 2147483000 !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.65) !important;
+}
+.login-notice-overlay.is-hidden {
+    display: none !important;
+}
+.login-notice-card {
+    width: 100%;
+    max-width: 420px;
+    max-height: 85vh;
+    overflow: auto;
     background: #1a1a1a;
     color: #f5f5f5;
     border: 1px solid #333;
     border-radius: 10px;
-    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
 }
-.login-notice-modal__header {
+.login-notice-card__header {
     border-bottom: 1px solid #333;
     padding: 1rem 1.25rem;
 }
-.login-notice-modal__title {
+.login-notice-card__title {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -50,143 +82,64 @@
     font-weight: 700;
     color: #fff;
 }
-.login-notice-modal__title i {
+.login-notice-card__title i {
     font-size: 1.25rem;
 }
-.login-notice-modal__body {
+.login-notice-card__body {
     padding: 1.25rem;
     font-size: 0.95rem;
     line-height: 1.6;
     color: #eee;
 }
-.login-notice-modal__body p {
+.login-notice-card__body p {
     margin-bottom: 0.85rem;
 }
-.login-notice-modal__body a {
-    color: #4da3ff;
+.login-notice-card__body a {
+    color: #4da3ff !important;
     word-break: break-all;
 }
-.login-notice-modal__footer {
-    border-top: 0;
+.login-notice-card__footer {
     padding: 0 1.25rem 1.25rem;
 }
-.login-notice-modal__close {
+.login-notice-card__close {
     width: 100%;
     background: #b91c1c;
     color: #fff;
     border: 0;
     border-radius: 6px;
-    padding: 0.7rem 1rem;
+    padding: 0.75rem 1rem;
     font-weight: 600;
     cursor: pointer;
 }
-.login-notice-modal__close:hover,
-.login-notice-modal__close:focus {
+.login-notice-card__close:hover,
+.login-notice-card__close:focus {
     background: #991b1b;
     color: #fff;
 }
 body.login-notice-open {
-    overflow: hidden;
-}
-#loginNoticeModal.show {
-    display: block;
-}
-#loginNoticeModal .modal-dialog {
-    z-index: 1060;
-}
-.login-notice-backdrop {
-    position: fixed;
-    inset: 0;
-    z-index: 1055;
-    background: rgba(0, 0, 0, 0.55);
+    overflow: hidden !important;
 }
 </style>
 
 <script>
 (function () {
-    function closeLoginNotice() {
-        var el = document.getElementById('loginNoticeModal');
-        if (!el) return;
+    var overlay = document.getElementById('loginNoticeOverlay');
+    var closeBtn = document.getElementById('loginNoticeCloseBtn');
+    if (!overlay) return;
 
-        try {
-            if (window.bootstrap && bootstrap.Modal) {
-                var inst = bootstrap.Modal.getInstance(el) || bootstrap.Modal.getOrCreateInstance(el);
-                if (inst) {
-                    inst.hide();
-                }
-            }
-        } catch (e) {}
+    document.body.classList.add('login-notice-open');
 
-        try {
-            if (window.jQuery && typeof jQuery(el).modal === 'function') {
-                jQuery(el).modal('hide');
-            }
-        } catch (e) {}
+    function closeNotice() {
+        overlay.classList.add('is-hidden');
+        document.body.classList.remove('login-notice-open');
+    }
 
-        el.classList.remove('show');
-        el.style.display = 'none';
-        el.setAttribute('aria-hidden', 'true');
-        document.body.classList.remove('login-notice-open', 'modal-open');
-        document.body.style.removeProperty('overflow');
-        document.body.style.removeProperty('padding-right');
-        document.querySelectorAll('.login-notice-backdrop, .modal-backdrop').forEach(function (node) {
-            node.remove();
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            closeNotice();
         });
-    }
-
-    function openLoginNotice() {
-        var el = document.getElementById('loginNoticeModal');
-        if (!el) return;
-
-        var opened = false;
-        try {
-            if (window.bootstrap && bootstrap.Modal) {
-                bootstrap.Modal.getOrCreateInstance(el, { backdrop: 'static', keyboard: false }).show();
-                opened = true;
-            }
-        } catch (e) {}
-
-        if (!opened) {
-            try {
-                if (window.jQuery && typeof jQuery(el).modal === 'function') {
-                    jQuery(el).modal({ backdrop: 'static', keyboard: false, show: true });
-                    opened = true;
-                }
-            } catch (e) {}
-        }
-
-        if (!opened) {
-            if (!document.querySelector('.login-notice-backdrop')) {
-                var backdrop = document.createElement('div');
-                backdrop.className = 'login-notice-backdrop';
-                document.body.appendChild(backdrop);
-            }
-            el.style.display = 'block';
-            el.classList.add('show');
-            el.removeAttribute('aria-hidden');
-            document.body.classList.add('login-notice-open');
-        }
-
-        var btn = document.getElementById('loginNoticeCloseBtn');
-        if (btn && !btn.dataset.bound) {
-            btn.dataset.bound = '1';
-            btn.addEventListener('click', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                closeLoginNotice();
-            });
-        }
-    }
-
-    function boot() {
-        // Wait until page scripts (Bootstrap) finish loading.
-        setTimeout(openLoginNotice, 100);
-    }
-
-    if (document.readyState === 'complete') {
-        boot();
-    } else {
-        window.addEventListener('load', boot);
     }
 })();
 </script>
