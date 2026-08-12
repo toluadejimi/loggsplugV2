@@ -7,7 +7,7 @@
                 @csrf
                 <div class="card-body">
                     <p class="text-muted mb-4">
-                        @lang('This popup appears once after a customer successfully logs in. Disable it anytime, or edit the message as needed.')
+                        @lang('This popup shows on the Products page every time it is loaded or refreshed. It also appears once after a customer logs in. Disable it anytime, or edit the message as needed.')
                     </p>
                     <div class="row">
                         <div class="col-md-3">

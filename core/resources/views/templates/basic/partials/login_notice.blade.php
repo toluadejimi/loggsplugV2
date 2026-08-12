@@ -1,12 +1,15 @@
 @php
-    $showLoginNotice = session()->pull('show_login_notice', false);
-    $loginNotice = null;
-    if ($showLoginNotice) {
-        $loginNotice = \App\Models\Frontend::where('data_keys', 'login_notice.data')->first();
-    }
+    $loginNotice = \App\Models\Frontend::where('data_keys', 'login_notice.data')->first();
+    $noticeEnabled = @$loginNotice->data_values->status == \App\Constants\Status::ENABLE
+        && !empty(@$loginNotice->data_values->description);
+
+    // Show on /products every reload; also after login on other pages (one-shot session flag).
+    $onProductsPage = request()->routeIs('products');
+    $showAfterLogin = (bool) session()->pull('show_login_notice', false);
+    $showLoginNotice = $noticeEnabled && ($onProductsPage || $showAfterLogin);
 @endphp
 
-@if ($showLoginNotice && @$loginNotice->data_values->status == \App\Constants\Status::ENABLE && !empty(@$loginNotice->data_values->description))
+@if ($showLoginNotice)
 <div class="modal fade" id="loginNoticeModal" tabindex="-1" aria-labelledby="loginNoticeTitle" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content login-notice-modal">
