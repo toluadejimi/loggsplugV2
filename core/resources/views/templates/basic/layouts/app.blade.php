@@ -53,8 +53,6 @@
         </div>
     @endif
 
-    @include($activeTemplate . 'partials.login_notice')
-
     <!-- Same JS as /products (layouts.main) -->
     <script src="{{ url('') }}/assets/assets2/js/jquery-3.7.1.min.js"></script>
     <script src="{{ url('') }}/assets/assets2/js/boostrap.bundle.min.js"></script>
@@ -157,6 +155,8 @@
     .scroll-top:hover { color: #fff; transform: translateY(-2px); }
     .scroll-top.show { opacity: 1; visibility: visible; }
     </style>
+
+    @include($activeTemplate . 'partials.login_notice')
 </body>
 
 </html>

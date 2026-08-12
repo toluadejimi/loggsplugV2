@@ -20,7 +20,7 @@
                 @php echo @$loginNotice->data_values->description @endphp
             </div>
             <div class="modal-footer login-notice-modal__footer">
-                <button type="button" class="btn login-notice-modal__close" data-bs-dismiss="modal">@lang('Close')</button>
+                <button type="button" class="btn login-notice-modal__close" id="loginNoticeCloseBtn">@lang('Close')</button>
             </div>
         </div>
     </div>
@@ -75,25 +75,116 @@
     border-radius: 6px;
     padding: 0.7rem 1rem;
     font-weight: 600;
+    cursor: pointer;
 }
 .login-notice-modal__close:hover,
 .login-notice-modal__close:focus {
     background: #991b1b;
     color: #fff;
 }
+body.login-notice-open {
+    overflow: hidden;
+}
+#loginNoticeModal.show {
+    display: block;
+}
+#loginNoticeModal .modal-dialog {
+    z-index: 1060;
+}
+.login-notice-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1055;
+    background: rgba(0, 0, 0, 0.55);
+}
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    var el = document.getElementById('loginNoticeModal');
-    if (!el) return;
-    if (window.bootstrap && bootstrap.Modal) {
-        new bootstrap.Modal(el).show();
-        return;
+(function () {
+    function closeLoginNotice() {
+        var el = document.getElementById('loginNoticeModal');
+        if (!el) return;
+
+        try {
+            if (window.bootstrap && bootstrap.Modal) {
+                var inst = bootstrap.Modal.getInstance(el) || bootstrap.Modal.getOrCreateInstance(el);
+                if (inst) {
+                    inst.hide();
+                }
+            }
+        } catch (e) {}
+
+        try {
+            if (window.jQuery && typeof jQuery(el).modal === 'function') {
+                jQuery(el).modal('hide');
+            }
+        } catch (e) {}
+
+        el.classList.remove('show');
+        el.style.display = 'none';
+        el.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('login-notice-open', 'modal-open');
+        document.body.style.removeProperty('overflow');
+        document.body.style.removeProperty('padding-right');
+        document.querySelectorAll('.login-notice-backdrop, .modal-backdrop').forEach(function (node) {
+            node.remove();
+        });
     }
-    if (window.jQuery && typeof jQuery(el).modal === 'function') {
-        jQuery(el).modal('show');
+
+    function openLoginNotice() {
+        var el = document.getElementById('loginNoticeModal');
+        if (!el) return;
+
+        var opened = false;
+        try {
+            if (window.bootstrap && bootstrap.Modal) {
+                bootstrap.Modal.getOrCreateInstance(el, { backdrop: 'static', keyboard: false }).show();
+                opened = true;
+            }
+        } catch (e) {}
+
+        if (!opened) {
+            try {
+                if (window.jQuery && typeof jQuery(el).modal === 'function') {
+                    jQuery(el).modal({ backdrop: 'static', keyboard: false, show: true });
+                    opened = true;
+                }
+            } catch (e) {}
+        }
+
+        if (!opened) {
+            if (!document.querySelector('.login-notice-backdrop')) {
+                var backdrop = document.createElement('div');
+                backdrop.className = 'login-notice-backdrop';
+                document.body.appendChild(backdrop);
+            }
+            el.style.display = 'block';
+            el.classList.add('show');
+            el.removeAttribute('aria-hidden');
+            document.body.classList.add('login-notice-open');
+        }
+
+        var btn = document.getElementById('loginNoticeCloseBtn');
+        if (btn && !btn.dataset.bound) {
+            btn.dataset.bound = '1';
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                closeLoginNotice();
+            });
+        }
     }
-});
+
+    function boot() {
+        // Wait until page scripts (Bootstrap) finish loading.
+        setTimeout(openLoginNotice, 100);
+    }
+
+    if (document.readyState === 'complete') {
+        boot();
+    } else {
+        window.addEventListener('load', boot);
+    }
+})();
 </script>
 @endif
