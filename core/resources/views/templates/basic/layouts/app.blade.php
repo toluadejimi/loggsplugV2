@@ -53,6 +53,8 @@
         </div>
     @endif
 
+    @include($activeTemplate . 'partials.login_notice')
+
     <!-- Same JS as /products (layouts.main) -->
     <script src="{{ url('') }}/assets/assets2/js/jquery-3.7.1.min.js"></script>
     <script src="{{ url('') }}/assets/assets2/js/boostrap.bundle.min.js"></script>

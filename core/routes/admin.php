@@ -244,6 +244,10 @@ Route::middleware('admin')->group(function () {
         Route::get('cookie','cookie')->name('setting.cookie');
         Route::post('cookie','cookieSubmit');
 
+        // Login notice popup
+        Route::get('login-notice', 'loginNotice')->name('setting.login.notice');
+        Route::post('login-notice', 'loginNoticeSubmit');
+
         //maintenance_mode
         Route::get('maintenance-mode','maintenanceMode')->name('maintenance.mode');
         Route::post('maintenance-mode','maintenanceModeSubmit');

@@ -204,6 +204,7 @@ class ManageUsersController extends Controller
 
     public function login($id){
         Auth::loginUsingId($id);
+        session()->put('show_login_notice', true);
         return to_route('user.home');
     }
 

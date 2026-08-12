@@ -459,6 +459,13 @@
                     </a>
                 </li>
 
+                <li class="sidebar-menu-item {{menuActive('admin.setting.login.notice')}}">
+                    <a href="{{route('admin.setting.login.notice')}}" class="nav-link">
+                        <i class="menu-icon las la-bell"></i>
+                        <span class="menu-title">@lang('Login Notice')</span>
+                    </a>
+                </li>
+
                 <li class="sidebar-menu-item sidebar-dropdown">
                     <a href="javascript:void(0)" class="{{menuActive('admin.system*',3)}}">
                         <i class="menu-icon la la-server"></i>

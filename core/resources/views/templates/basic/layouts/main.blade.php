@@ -1066,7 +1066,7 @@
 {{--    startFestiveDrop();--}}
 {{--</script>--}}
 
-
+@include($activeTemplate . 'partials.login_notice')
 
 </body>
 

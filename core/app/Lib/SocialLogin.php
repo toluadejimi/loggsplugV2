@@ -55,6 +55,7 @@ class SocialLogin
         }
         Auth::login($userData);
         $this->loginLog($userData);
+        session()->put('show_login_notice', true);
         return to_route('user.home');
     }
 

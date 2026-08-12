@@ -148,6 +148,8 @@ class LoginController extends Controller
         $userLogin->os = @$userAgent['os_platform'];
         $userLogin->save();
 
+        session()->put('show_login_notice', true);
+
         $redirectUrl = session()->get('redirect_after_login');
         if($redirectUrl){
             session()->forget('redirect_after_login');

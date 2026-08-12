@@ -187,6 +187,46 @@ class GeneralSettingController extends Controller
         return back()->withNotify($notify);
     }
 
+    public function loginNotice()
+    {
+        $pageTitle = 'Login Notice Popup';
+        $notice = Frontend::firstOrCreate(
+            ['data_keys' => 'login_notice.data'],
+            [
+                'data_values' => [
+                    'status' => Status::ENABLE,
+                    'title' => 'Notice',
+                    'description' => '<p>Welcome! Join our Telegram community for updates.</p>',
+                ],
+            ]
+        );
+
+        return view('admin.setting.login_notice', compact('pageTitle', 'notice'));
+    }
+
+    public function loginNoticeSubmit(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|max:120',
+            'description' => 'required',
+        ]);
+
+        $notice = Frontend::firstOrCreate(
+            ['data_keys' => 'login_notice.data'],
+            ['data_values' => []]
+        );
+
+        $notice->data_values = [
+            'status' => $request->status ? Status::ENABLE : Status::DISABLE,
+            'title' => $request->title,
+            'description' => $request->description,
+        ];
+        $notice->save();
+
+        $notify[] = ['success', 'Login notice updated successfully'];
+        return back()->withNotify($notify);
+    }
+
     public function socialiteCredentials()
     {
         $pageTitle = 'Social Login Credentials';
